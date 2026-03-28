@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  profiles:
+    active: dev
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.iflytek.admin.modules.system.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.iflytek.admin: ${LOG_LEVEL:info}

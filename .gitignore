@@ -1,0 +1,44 @@
+# ===========================================
+# Admin Management System - Git Ignore
+# ===========================================
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- IDE ----------
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# ---------- Environment ----------
+.env
+.env.local
+.env.development
+.env.production
+docker/.env
+
+# ---------- Logs ----------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---------- Frontend (Node.js) ----------
+admin-frontend/node_modules/
+admin-frontend/dist/
+admin-frontend/coverage/
+admin-frontend/.vitest/
+admin-frontend/playwright-report/
+admin-frontend/test-results/
+
+# ---------- Backend (Java/Maven) ----------
+admin-backend/target/
+admin-backend/*.jar
+
+# ---------- Docker ----------
+docker/mysql-data/
