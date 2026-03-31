@@ -25,13 +25,21 @@
       <template #header>
         <div class="flex-between">
           <span>用户列表</span>
-          <el-button v-permission="'sys:user:add'" type="primary" @click="handleAdd">
-            <el-icon><Plus /></el-icon>新增用户
-          </el-button>
+          <div>
+            <el-button v-permission="'sys:user:export'" type="success" :loading="exportLoading" @click="handleExport">
+              <el-icon><Download /></el-icon>导出
+            </el-button>
+            <el-button v-permission="'sys:user:add'" type="primary" @click="handleAdd">
+              <el-icon><Plus /></el-icon>新增用户
+            </el-button>
+          </div>
         </div>
       </template>
 
       <el-table :data="tableData" v-loading="loading" class="table-full">
+        <template #empty>
+          <el-empty description="暂无用户数据" :image-size="120" />
+        </template>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" min-width="120" />
         <el-table-column prop="nickname" label="昵称" min-width="120" />
@@ -111,7 +119,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser, updateUserStatus } from '@/api/modules/user'
+import { getUserList, createUser, updateUser, deleteUser, updateUserStatus, exportUsers } from '@/api/modules/user'
 import { getRoleList } from '@/api/modules/role'
 import { usePagination } from '@/composables/usePagination'
 import type { UserInfo, UserForm } from '@/types/user'
@@ -119,6 +127,7 @@ import type { RoleInfo } from '@/types/role'
 
 const loading = ref(false)
 const submitLoading = ref(false)
+const exportLoading = ref(false)
 const tableData = ref<UserInfo[]>([])
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -161,6 +170,24 @@ async function fetchRoles() {
     const { data } = await getRoleList()
     roleList.value = data
   } catch { /* handled by interceptor */ }
+}
+
+async function handleExport() {
+  exportLoading.value = true
+  try {
+    const blob = await exportUsers(searchForm) as unknown as Blob
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '用户列表.xlsx'
+    link.click()
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch {
+    ElMessage.error('导出失败')
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 function handleAdd() { isEdit.value = false; fetchRoles(); dialogVisible.value = true }

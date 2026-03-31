@@ -24,5 +24,17 @@ export default defineConfig({
         additionalData: `@use "@/assets/styles/variables.scss" as *;`
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'element-plus': ['element-plus'],
+          'axios': ['axios']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })

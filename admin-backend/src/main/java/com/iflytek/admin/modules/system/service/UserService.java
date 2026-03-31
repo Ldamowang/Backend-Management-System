@@ -5,6 +5,7 @@ import com.iflytek.admin.modules.system.dto.UserCreateDTO;
 import com.iflytek.admin.modules.system.dto.UserQueryDTO;
 import com.iflytek.admin.modules.system.dto.UserUpdateDTO;
 
+import java.util.List;
 import java.util.Map;
 
 public interface UserService {
@@ -14,4 +15,5 @@ public interface UserService {
     void update(Long id, UserUpdateDTO dto);
     void delete(Long id);
     void updateStatus(Long id, Integer status);
+    List<Map<String, Object>> listForExport(UserQueryDTO query);
 }

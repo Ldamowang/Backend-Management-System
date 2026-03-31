@@ -116,6 +116,13 @@
             <version>${hutool.version}</version>
         </dependency>
 
+        <!-- Apache POI (Excel export, required by Hutool ExcelUtil) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -46,6 +46,7 @@ INSERT INTO `sys_menu` (`id`, `parent_id`, `menu_name`, `menu_type`, `path`, `co
 (2011, 201, '新增用户', 3, NULL, NULL, NULL, 1, 'sys:user:add', 1, 1),
 (2012, 201, '编辑用户', 3, NULL, NULL, NULL, 2, 'sys:user:edit', 1, 1),
 (2013, 201, '删除用户', 3, NULL, NULL, NULL, 3, 'sys:user:delete', 1, 1),
+(2014, 201, '导出用户', 3, NULL, NULL, NULL, 4, 'sys:user:export', 1, 1),
 -- 角色管理按钮
 (2021, 202, '新增角色', 3, NULL, NULL, NULL, 1, 'sys:role:add', 1, 1),
 (2022, 202, '编辑角色', 3, NULL, NULL, NULL, 2, 'sys:role:edit', 1, 1),

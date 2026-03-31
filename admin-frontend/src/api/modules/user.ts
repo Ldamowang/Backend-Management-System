@@ -25,3 +25,10 @@ export function deleteUser(id: number): Promise<ApiResponse<null>> {
 export function updateUserStatus(id: number, status: number): Promise<ApiResponse<null>> {
   return request.patch(`/users/${id}/status`, { status })
 }
+
+export function exportUsers(params?: UserQuery): Promise<Blob> {
+  return request.get('/users/export', {
+    params,
+    responseType: 'blob'
+  })
+}

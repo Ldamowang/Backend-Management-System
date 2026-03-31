@@ -68,23 +68,15 @@ public class RateLimiterAspect {
      * 获取客户端真实 IP。
      * 优先从代理头中获取，支持 Nginx 等反向代理场景。
      */
+    /**
+     * 获取客户端真实 IP。
+     * 优先信任 Nginx 设置的 X-Real-IP（不可被客户端伪造），
+     * 回退到 remoteAddr，不信任客户端可控的 X-Forwarded-For。
+     */
     private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
+        String ip = request.getHeader("X-Real-IP");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
-        }
-        // X-Forwarded-For 可能包含多个 IP，取第一个
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
         }
         return ip;
     }

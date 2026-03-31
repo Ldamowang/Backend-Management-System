@@ -32,6 +32,7 @@ public class AuthController {
     }
 
     @Operation(summary = "用户登出")
+    @RateLimiter(count = 10, time = 60)
     @PostMapping("/logout")
     public Result<Void> logout(HttpServletRequest request) {
         authService.logout(request.getHeader("Authorization"));
@@ -39,6 +40,7 @@ public class AuthController {
     }
 
     @Operation(summary = "刷新Token")
+    @RateLimiter(count = 10, time = 60)
     @PostMapping("/refresh")
     public Result<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenDTO dto) {
         return Result.ok(authService.refreshToken(dto.getRefreshToken()));

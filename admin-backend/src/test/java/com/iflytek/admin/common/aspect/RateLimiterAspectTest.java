@@ -97,17 +97,17 @@ class RateLimiterAspectTest {
     }
 
     @Test
-    @DisplayName("X-Forwarded-For 头 - 使用代理IP")
-    void doBefore_xForwardedFor() {
+    @DisplayName("X-Forwarded-For 头 - 忽略不可信头，使用 remoteAddr")
+    void doBefore_xForwardedFor_ignored() {
         request.addHeader("X-Forwarded-For", "192.168.1.1, 10.0.0.1");
         when(rateLimiter.count()).thenReturn(5);
         when(rateLimiter.time()).thenReturn(60);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.increment(contains("192.168.1.1"), eq(1L))).thenReturn(1L);
+        when(valueOperations.increment(contains("127.0.0.1"), eq(1L))).thenReturn(1L);
 
         rateLimiterAspect.doBefore(joinPoint, rateLimiter);
 
-        verify(valueOperations).increment(contains("192.168.1.1"), eq(1L));
+        verify(valueOperations).increment(contains("127.0.0.1"), eq(1L));
     }
 
     @Test

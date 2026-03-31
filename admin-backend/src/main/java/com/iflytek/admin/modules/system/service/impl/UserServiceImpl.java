@@ -112,6 +112,27 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(user);
     }
 
+    private static final int EXPORT_MAX_ROWS = 10000;
+
+    @Override
+    public List<Map<String, Object>> listForExport(UserQueryDTO query) {
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(query.getUsername())) {
+            wrapper.like(SysUser::getUsername, query.getUsername());
+        }
+        if (StringUtils.hasText(query.getEmail())) {
+            wrapper.like(SysUser::getEmail, query.getEmail());
+        }
+        if (query.getStatus() != null) {
+            wrapper.eq(SysUser::getStatus, query.getStatus());
+        }
+        wrapper.orderByDesc(SysUser::getCreatedTime);
+        wrapper.last("LIMIT " + EXPORT_MAX_ROWS);
+
+        List<SysUser> users = userMapper.selectList(wrapper);
+        return users.stream().map(this::toUserMap).collect(Collectors.toList());
+    }
+
     private void saveUserRoles(Long userId, List<Long> roleIds) {
         if (roleIds != null) {
             roleIds.forEach(roleId -> {

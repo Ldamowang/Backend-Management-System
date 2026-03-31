@@ -1,5 +1,7 @@
 package com.iflytek.admin.modules.system.controller;
 
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.PageResult;
 import com.iflytek.admin.common.result.Result;
@@ -10,11 +12,17 @@ import com.iflytek.admin.modules.system.dto.UserUpdateDTO;
 import com.iflytek.admin.modules.system.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "用户管理")
@@ -73,5 +81,36 @@ public class UserController {
     public Result<Void> updateStatus(@PathVariable Long id, @Valid @RequestBody StatusDTO dto) {
         userService.updateStatus(id, dto.getStatus());
         return Result.ok();
+    }
+
+    @Operation(summary = "导出用户列表")
+    @PreAuthorize("hasAuthority('sys:user:export')")
+    @Log(module = "用户管理", operation = "导出")
+    @GetMapping("/export")
+    public void export(UserQueryDTO query, HttpServletResponse response) throws IOException {
+        List<Map<String, Object>> users = userService.listForExport(query);
+
+        // 定义列映射（中文表头 -> 字段名）
+        Map<String, String> headerAlias = new LinkedHashMap<>();
+        headerAlias.put("id", "ID");
+        headerAlias.put("username", "用户名");
+        headerAlias.put("nickname", "昵称");
+        headerAlias.put("email", "邮箱");
+        headerAlias.put("phone", "手机号");
+        headerAlias.put("gender", "性别");
+        headerAlias.put("status", "状态");
+        headerAlias.put("createdTime", "创建时间");
+
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+        headerAlias.forEach((field, alias) -> writer.addHeaderAlias(field, alias));
+        writer.setOnlyAlias(true);
+        writer.write(users, true);
+        writer.autoSizeColumnAll();
+
+        String fileName = URLEncoder.encode("用户列表.xlsx", StandardCharsets.UTF_8);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        writer.flush(response.getOutputStream(), true);
+        writer.close();
     }
 }
