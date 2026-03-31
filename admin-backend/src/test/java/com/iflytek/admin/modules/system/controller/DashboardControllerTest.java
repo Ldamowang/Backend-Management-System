@@ -8,11 +8,13 @@ import com.iflytek.admin.modules.system.mapper.SysUserMapper;
 import com.iflytek.admin.security.CustomAccessDeniedHandler;
 import com.iflytek.admin.security.CustomUserDetailsService;
 import com.iflytek.admin.security.JwtAuthenticationEntryPoint;
+import com.iflytek.admin.security.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.bean.MockBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -23,8 +25,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(DashboardController.class)
-@Import({JwtAuthenticationEntryPoint.class, CustomAccessDeniedHandler.class})
+@WebMvcTest(value = DashboardController.class, excludeAutoConfiguration = UserDetailsServiceAutoConfiguration.class)
+@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class, CustomAccessDeniedHandler.class})
 @DisplayName("DashboardController 仪表盘接口测试")
 class DashboardControllerTest {
 

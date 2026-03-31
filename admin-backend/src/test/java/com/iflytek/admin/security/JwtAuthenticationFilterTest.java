@@ -77,6 +77,7 @@ class JwtAuthenticationFilterTest {
     void validToken_setsAuthentication() throws ServletException, IOException {
         request.addHeader("Authorization", "Bearer valid-token");
         when(jwtUtil.isTokenValid("valid-token")).thenReturn(true);
+        when(jwtUtil.getTokenType("valid-token")).thenReturn("access");
         when(redisTemplate.hasKey("token:blacklist:valid-token")).thenReturn(false);
         when(jwtUtil.getUsername("valid-token")).thenReturn("admin");
         when(jwtUtil.getUserId("valid-token")).thenReturn(1L);
@@ -99,6 +100,7 @@ class JwtAuthenticationFilterTest {
     void blacklistedToken_passThrough() throws ServletException, IOException {
         request.addHeader("Authorization", "Bearer blacklisted-token");
         when(jwtUtil.isTokenValid("blacklisted-token")).thenReturn(true);
+        when(jwtUtil.getTokenType("blacklisted-token")).thenReturn("access");
         when(redisTemplate.hasKey("token:blacklist:blacklisted-token")).thenReturn(true);
 
         filter.doFilterInternal(request, response, filterChain);
