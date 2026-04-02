@@ -2,6 +2,7 @@ package com.iflytek.admin.modules.system.controller;
 
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.PageResult;
 import com.iflytek.admin.common.result.Result;
@@ -50,6 +51,7 @@ public class UserController {
     @Operation(summary = "新增用户")
     @PreAuthorize("hasAuthority('sys:user:add')")
     @Log(module = "用户管理", operation = "新增")
+    @Idempotent
     @PostMapping
     public Result<Void> create(@Valid @RequestBody UserCreateDTO dto) {
         userService.create(dto);

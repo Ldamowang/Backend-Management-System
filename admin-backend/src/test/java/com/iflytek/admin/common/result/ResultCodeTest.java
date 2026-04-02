@@ -74,6 +74,6 @@ class ResultCodeTest {
     @Test
     @DisplayName("枚举数量正确")
     void enumCount() {
-        assertThat(ResultCode.values()).hasSize(12);
+        assertThat(ResultCode.values()).hasSize(13);
     }
 }

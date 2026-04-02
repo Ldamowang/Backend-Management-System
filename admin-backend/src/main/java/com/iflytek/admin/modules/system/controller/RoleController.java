@@ -1,5 +1,6 @@
 package com.iflytek.admin.modules.system.controller;
 
+import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.Result;
 import com.iflytek.admin.modules.system.dto.AssignMenusDTO;
@@ -40,6 +41,7 @@ public class RoleController {
     @Operation(summary = "新增角色")
     @PreAuthorize("hasAuthority('sys:role:add')")
     @Log(module = "角色管理", operation = "新增")
+    @Idempotent
     @PostMapping
     public Result<Void> create(@Valid @RequestBody RoleFormDTO dto) {
         roleService.create(dto);

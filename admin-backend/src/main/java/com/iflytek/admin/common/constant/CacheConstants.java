@@ -13,6 +13,7 @@ public final class CacheConstants {
     public static final String CONFIG_PREFIX = "config:";
     public static final String MENU_USER_PREFIX = "menu:user:";
     public static final String PERM_USER_PREFIX = "perm:user:";
+    public static final String IDEMPOTENT_PREFIX = "idempotent:";
 
     /** 字典缓存 TTL：24 小时（秒） */
     public static final long DICT_TTL = 86400;

@@ -15,7 +15,8 @@ public enum ResultCode {
     WRONG_PASSWORD(40003, "用户名或密码错误"),
     TOKEN_EXPIRED(40004, "Token已过期"),
     TOKEN_INVALID(40005, "Token无效"),
-    RATE_LIMIT_EXCEEDED(429, "请求过于频繁，请稍后再试");
+    RATE_LIMIT_EXCEEDED(429, "请求过于频繁，请稍后再试"),
+    DUPLICATE_SUBMIT(40006, "请勿重复提交");
 
     private final int code;
     private final String message;

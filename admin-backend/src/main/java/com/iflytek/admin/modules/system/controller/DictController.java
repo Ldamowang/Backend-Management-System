@@ -1,5 +1,6 @@
 package com.iflytek.admin.modules.system.controller;
 
+import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.Result;
 import com.iflytek.admin.modules.system.dto.DictDataFormDTO;
@@ -43,6 +44,7 @@ public class DictController {
     @Operation(summary = "新增字典类型")
     @PreAuthorize("hasAuthority('sys:dict:add')")
     @Log(module = "字典管理", operation = "新增类型")
+    @Idempotent
     @PostMapping("/types")
     public Result<Void> createType(@Valid @RequestBody DictTypeFormDTO dto) {
         dictService.createType(dto);
@@ -85,6 +87,7 @@ public class DictController {
     @Operation(summary = "新增字典数据")
     @PreAuthorize("hasAuthority('sys:dict:add')")
     @Log(module = "字典管理", operation = "新增数据")
+    @Idempotent
     @PostMapping("/data")
     public Result<Void> createData(@Valid @RequestBody DictDataFormDTO dto) {
         dictService.createData(dto);

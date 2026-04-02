@@ -1,5 +1,6 @@
 package com.iflytek.admin.modules.system.controller;
 
+import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.PageResult;
 import com.iflytek.admin.common.result.Result;
@@ -44,6 +45,7 @@ public class NoticeController {
     @Operation(summary = "新增通知")
     @PreAuthorize("hasAuthority('sys:notice:add')")
     @Log(module = "通知公告", operation = "新增")
+    @Idempotent
     @PostMapping
     public Result<Void> create(@Valid @RequestBody NoticeFormDTO dto) {
         noticeService.create(dto);

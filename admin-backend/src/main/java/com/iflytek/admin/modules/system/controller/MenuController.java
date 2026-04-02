@@ -1,5 +1,6 @@
 package com.iflytek.admin.modules.system.controller;
 
+import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.Result;
 import com.iflytek.admin.modules.system.dto.MenuFormDTO;
@@ -40,6 +41,7 @@ public class MenuController {
     @Operation(summary = "新增菜单")
     @PreAuthorize("hasAuthority('sys:menu:add')")
     @Log(module = "菜单管理", operation = "新增")
+    @Idempotent
     @PostMapping
     public Result<Void> create(@Valid @RequestBody MenuFormDTO dto) {
         menuService.create(dto);

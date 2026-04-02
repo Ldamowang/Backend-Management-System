@@ -1,5 +1,6 @@
 package com.iflytek.admin.modules.system.controller;
 
+import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.Result;
 import com.iflytek.admin.modules.system.dto.DeptFormDTO;
@@ -46,6 +47,7 @@ public class DeptController {
     @Operation(summary = "新增部门")
     @PreAuthorize("hasAuthority('sys:dept:add')")
     @Log(module = "部门管理", operation = "新增")
+    @Idempotent
     @PostMapping
     public Result<Void> create(@Valid @RequestBody DeptFormDTO dto) {
         deptService.create(dto);
