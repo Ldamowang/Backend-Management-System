@@ -9,14 +9,12 @@ import com.iflytek.admin.modules.system.entity.SysJob;
 import com.iflytek.admin.modules.system.entity.SysJobLog;
 import com.iflytek.admin.modules.system.mapper.SysJobLogMapper;
 import com.iflytek.admin.modules.system.mapper.SysJobMapper;
+import com.iflytek.admin.modules.system.scheduler.DynamicTaskManager;
+import com.iflytek.admin.modules.system.scheduler.JobRunner;
 import com.iflytek.admin.modules.system.service.JobService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Method;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -25,7 +23,8 @@ public class JobServiceImpl implements JobService {
 
     private final SysJobMapper jobMapper;
     private final SysJobLogMapper jobLogMapper;
-    private final ApplicationContext applicationContext;
+    private final DynamicTaskManager taskManager;
+    private final JobRunner jobRunner;
 
     @Override
     public PageResult<SysJob> page(int page, int size) {
@@ -47,6 +46,9 @@ public class JobServiceImpl implements JobService {
         SysJob job = new SysJob();
         applyDTO(job, dto);
         jobMapper.insert(job);
+        if (Integer.valueOf(1).equals(job.getStatus())) {
+            taskManager.addTask(job);
+        }
     }
 
     @Override
@@ -55,10 +57,16 @@ public class JobServiceImpl implements JobService {
         if (job == null) throw new BusinessException(404, "任务不存在");
         applyDTO(job, dto);
         jobMapper.updateById(job);
+        if (Integer.valueOf(1).equals(job.getStatus())) {
+            taskManager.updateTask(job);
+        } else {
+            taskManager.removeTask(id);
+        }
     }
 
     @Override
     public void delete(Long id) {
+        taskManager.removeTask(id);
         jobMapper.deleteById(id);
     }
 
@@ -68,13 +76,18 @@ public class JobServiceImpl implements JobService {
         if (job == null) throw new BusinessException(404, "任务不存在");
         job.setStatus(status);
         jobMapper.updateById(job);
+        if (Integer.valueOf(1).equals(status)) {
+            taskManager.addTask(job);
+        } else {
+            taskManager.removeTask(id);
+        }
     }
 
     @Override
     public void run(Long id) {
         SysJob job = jobMapper.selectById(id);
         if (job == null) throw new BusinessException(404, "任务不存在");
-        executeJob(job);
+        jobRunner.execute(job);
     }
 
     @Override
@@ -97,32 +110,4 @@ public class JobServiceImpl implements JobService {
         job.setDescription(dto.getDescription());
     }
 
-    private void executeJob(SysJob job) {
-        long startTime = System.currentTimeMillis();
-        SysJobLog jobLog = new SysJobLog();
-        jobLog.setJobId(job.getId());
-        jobLog.setJobName(job.getJobName());
-        jobLog.setInvokeTarget(job.getInvokeTarget());
-
-        try {
-            String invokeTarget = job.getInvokeTarget();
-            String beanName = invokeTarget.substring(0, invokeTarget.lastIndexOf('.'));
-            String methodName = invokeTarget.substring(invokeTarget.lastIndexOf('.') + 1);
-
-            Object bean = applicationContext.getBean(beanName);
-            Method method = bean.getClass().getMethod(methodName);
-            method.invoke(bean);
-
-            jobLog.setStatus(1);
-            jobLog.setMessage("执行成功");
-        } catch (Exception e) {
-            log.error("任务执行失败: {}", job.getInvokeTarget(), e);
-            jobLog.setStatus(0);
-            jobLog.setErrorMsg(e.getMessage());
-        } finally {
-            jobLog.setDuration(System.currentTimeMillis() - startTime);
-            jobLog.setCreatedTime(LocalDateTime.now());
-            jobLogMapper.insert(jobLog);
-        }
-    }
 }
