@@ -4,6 +4,7 @@ import { login as loginApi, logout as logoutApi, getUserInfo as getUserInfoApi }
 import { getToken, setToken, setRefreshToken, clearAuth } from '@/utils/auth'
 import type { LoginForm, UserInfo } from '@/types/user'
 import type { MenuItem } from '@/types/menu'
+import { useDictStore } from './dict'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(getToken())
@@ -43,6 +44,7 @@ export const useUserStore = defineStore('user', () => {
     permissions.value = []
     menus.value = []
     clearAuth()
+    useDictStore().clearAll()
   }
 
   function updateLocalProfile(patch: Partial<UserInfo>) {
