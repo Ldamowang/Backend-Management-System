@@ -1,0 +1,28 @@
+{
+  "title": "首页",
+  "userCount": "用户总数",
+  "roleCount": "角色数量",
+  "loginCount": "登录总数",
+  "systemStatus": "系统状态",
+  "running": "运行中",
+  "loginTrend": "近7日登录趋势",
+  "loginTimes": "登录次数",
+  "systemOverview": "系统概览",
+  "recentLogin": "最近登录记录",
+  "column": {
+    "username": "用户名",
+    "ip": "IP地址",
+    "location": "登录地点",
+    "browser": "浏览器",
+    "status": "状态",
+    "loginTime": "登录时间",
+    "success": "成功",
+    "failed": "失败"
+  },
+  "overview": {
+    "userCount": "用户数",
+    "roleCount": "角色数",
+    "menuCount": "菜单数",
+    "totalLogin": "登录总量"
+  }
+}

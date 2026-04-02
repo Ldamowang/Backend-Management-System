@@ -19,6 +19,8 @@ public class UserUpdateDTO {
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String phone;
 
+    private Long deptId;
+
     private Integer gender;
 
     private Integer status;

@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <div class="sidebar-header">
-      <h2 v-if="!appStore.sidebarCollapsed" class="logo">管理系统</h2>
+      <h2 v-if="!appStore.sidebarCollapsed" class="logo">{{ $t('login.title') }}</h2>
       <el-icon v-else class="logo-icon"><House /></el-icon>
     </div>
 
@@ -18,7 +18,7 @@
         <!-- 静态菜单: 仪表盘 -->
         <el-menu-item index="/dashboard">
           <el-icon><Monitor /></el-icon>
-          <template #title>仪表盘</template>
+          <template #title>{{ $t('menu.dashboard') }}</template>
         </el-menu-item>
 
         <!-- 动态菜单 -->

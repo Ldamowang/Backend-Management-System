@@ -1,0 +1,19 @@
+{
+  "dashboard": "Dashboard",
+  "system": "System",
+  "user": "Users",
+  "role": "Roles",
+  "menu": "Menus",
+  "config": "Config",
+  "log": "Logs",
+  "operationLog": "Operation Logs",
+  "loginLog": "Login Logs",
+  "dept": "Departments",
+  "dict": "Dictionaries",
+  "online": "Online Users",
+  "file": "Files",
+  "notice": "Notices",
+  "job": "Jobs",
+  "monitor": "Monitor",
+  "profile": "Profile"
+}

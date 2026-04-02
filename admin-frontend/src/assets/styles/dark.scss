@@ -1,0 +1,27 @@
+// Element Plus 暗黑模式 CSS 变量
+@use 'element-plus/theme-chalk/dark/css-vars.css';
+
+html.dark {
+  // 侧边栏
+  --sidebar-bg: #1d1e1f;
+  --sidebar-header-bg: #141414;
+
+  // 头部
+  --header-bg: #1d1e1f;
+  --header-border: #363637;
+
+  // 内容区
+  --content-bg: #141414;
+
+  // 文本
+  --text-primary: #e5eaf3;
+  --text-regular: #cfd3dc;
+  --text-secondary: #a3a6ad;
+
+  // 边框
+  --border-color: #363637;
+  --border-light: #414243;
+
+  // 滚动条
+  --scrollbar-thumb: #4c4d4f;
+}

@@ -3,15 +3,15 @@
     <el-row :gutter="20">
       <el-col :span="8">
         <el-card>
-          <template #header><span>个人信息</span></template>
+          <template #header><span>{{ $t('profile.personalInfo') }}</span></template>
           <div class="profile-avatar-section">
             <el-avatar :size="80" :icon="User" />
-            <h3 class="profile-name">{{ profileData.nickname || '未设置' }}</h3>
+            <h3 class="profile-name">{{ profileData.nickname || $t('profile.notSet') }}</h3>
             <p class="profile-username">{{ profileData.username }}</p>
             <el-divider />
             <div class="text-left">
-              <p><el-icon><Message /></el-icon> {{ profileData.email || '未设置' }}</p>
-              <p class="profile-info-item"><el-icon><Phone /></el-icon> {{ profileData.phone || '未设置' }}</p>
+              <p><el-icon><Message /></el-icon> {{ profileData.email || $t('profile.notSet') }}</p>
+              <p class="profile-info-item"><el-icon><Phone /></el-icon> {{ profileData.phone || $t('profile.notSet') }}</p>
               <p class="profile-info-item"><el-icon><Male /></el-icon> {{ genderLabel }}</p>
             </div>
           </div>
@@ -21,43 +21,43 @@
       <el-col :span="16">
         <el-card>
           <el-tabs v-model="activeTab">
-            <el-tab-pane label="基本资料" name="info">
+            <el-tab-pane :label="$t('profile.basicProfile')" name="info">
               <el-form ref="infoFormRef" :model="infoForm" :rules="infoRules" label-width="80px" class="profile-form">
-                <el-form-item label="昵称" prop="nickname">
+                <el-form-item :label="$t('profile.nickname')" prop="nickname">
                   <el-input v-model="infoForm.nickname" />
                 </el-form-item>
-                <el-form-item label="邮箱" prop="email">
+                <el-form-item :label="$t('profile.email')" prop="email">
                   <el-input v-model="infoForm.email" />
                 </el-form-item>
-                <el-form-item label="手机号" prop="phone">
+                <el-form-item :label="$t('profile.phone')" prop="phone">
                   <el-input v-model="infoForm.phone" />
                 </el-form-item>
-                <el-form-item label="性别">
+                <el-form-item :label="$t('profile.gender')">
                   <el-radio-group v-model="infoForm.gender">
-                    <el-radio :value="1">男</el-radio>
-                    <el-radio :value="2">女</el-radio>
-                    <el-radio :value="0">保密</el-radio>
+                    <el-radio :value="1">{{ $t('profile.male') }}</el-radio>
+                    <el-radio :value="2">{{ $t('profile.female') }}</el-radio>
+                    <el-radio :value="0">{{ $t('profile.secret') }}</el-radio>
                   </el-radio-group>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" :loading="infoLoading" @click="handleUpdateInfo">保存修改</el-button>
+                  <el-button type="primary" :loading="infoLoading" @click="handleUpdateInfo">{{ $t('profile.saveChanges') }}</el-button>
                 </el-form-item>
               </el-form>
             </el-tab-pane>
 
-            <el-tab-pane label="修改密码" name="password">
+            <el-tab-pane :label="$t('profile.changePassword')" name="password">
               <el-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" label-width="100px" class="profile-form">
-                <el-form-item label="当前密码" prop="oldPassword">
+                <el-form-item :label="$t('profile.oldPassword')" prop="oldPassword">
                   <el-input v-model="pwdForm.oldPassword" type="password" show-password />
                 </el-form-item>
-                <el-form-item label="新密码" prop="newPassword">
+                <el-form-item :label="$t('profile.newPassword')" prop="newPassword">
                   <el-input v-model="pwdForm.newPassword" type="password" show-password />
                 </el-form-item>
-                <el-form-item label="确认密码" prop="confirmPassword">
+                <el-form-item :label="$t('profile.confirmPassword')" prop="confirmPassword">
                   <el-input v-model="pwdForm.confirmPassword" type="password" show-password />
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" :loading="pwdLoading" @click="handleUpdatePassword">修改密码</el-button>
+                  <el-button type="primary" :loading="pwdLoading" @click="handleUpdatePassword">{{ $t('profile.changePasswordBtn') }}</el-button>
                 </el-form-item>
               </el-form>
             </el-tab-pane>
@@ -70,11 +70,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { User, Message, Phone, Male } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/modules/user'
 import { getProfile, updateProfile, updatePassword, type ProfileInfo } from '@/api/modules/profile'
 
+const { t } = useI18n()
 const userStore = useUserStore()
 const activeTab = ref('info')
 const infoFormRef = ref<FormInstance>()
@@ -90,27 +92,27 @@ const infoForm = reactive({ nickname: '', email: '', phone: '', gender: 0 })
 const pwdForm = reactive({ oldPassword: '', newPassword: '', confirmPassword: '' })
 
 const genderLabel = computed(() => {
-  const map: Record<number, string> = { 0: '保密', 1: '男', 2: '女' }
-  return map[profileData.gender] ?? '保密'
+  const map: Record<number, string> = { 0: t('profile.secret'), 1: t('profile.male'), 2: t('profile.female') }
+  return map[profileData.gender] ?? t('profile.secret')
 })
 
 const infoRules: FormRules = {
-  nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
-  email: [{ type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }],
-  phone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }]
+  nickname: [{ required: true, message: t('profile.nicknameRequired'), trigger: 'blur' }],
+  email: [{ type: 'email', message: t('profile.emailInvalid'), trigger: 'blur' }],
+  phone: [{ pattern: /^1[3-9]\d{9}$/, message: t('profile.phoneInvalid'), trigger: 'blur' }]
 }
 
 const pwdRules: FormRules = {
-  oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+  oldPassword: [{ required: true, message: t('profile.oldPasswordRequired'), trigger: 'blur' }],
   newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度 6-20 个字符', trigger: 'blur' }
+    { required: true, message: t('profile.newPasswordRequired'), trigger: 'blur' },
+    { min: 6, max: 20, message: t('profile.passwordLength'), trigger: 'blur' }
   ],
   confirmPassword: [
-    { required: true, message: '请确认新密码', trigger: 'blur' },
+    { required: true, message: t('profile.confirmRequired'), trigger: 'blur' },
     {
       validator: (_r: unknown, value: string, callback: (error?: Error) => void) => {
-        value !== pwdForm.newPassword ? callback(new Error('两次密码不一致')) : callback()
+        value !== pwdForm.newPassword ? callback(new Error(t('profile.passwordMismatch'))) : callback()
       },
       trigger: 'blur'
     }
@@ -159,9 +161,9 @@ async function handleUpdateInfo() {
       phone: infoForm.phone,
       gender: infoForm.gender
     })
-    ElMessage.success('资料更新成功')
+    ElMessage.success(t('profile.updateSuccess'))
   } catch {
-    ElMessage.error('保存失败，请稍后重试')
+    ElMessage.error(t('profile.saveFailed'))
   } finally {
     infoLoading.value = false
   }
@@ -176,7 +178,7 @@ async function handleUpdatePassword() {
       oldPassword: pwdForm.oldPassword,
       newPassword: pwdForm.newPassword
     })
-    ElMessage.success('密码修改成功')
+    ElMessage.success(t('profile.passwordSuccess'))
     pwdForm.oldPassword = ''
     pwdForm.newPassword = ''
     pwdForm.confirmPassword = ''

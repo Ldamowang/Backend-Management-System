@@ -4,6 +4,7 @@ import 'nprogress/nprogress.css'
 import { getToken } from '@/utils/auth'
 import { useUserStore } from '@/stores/modules/user'
 import { usePermissionStore } from '@/stores/modules/permission'
+import { useTabStore } from '@/stores/modules/tab'
 import { notFoundRoute } from './static-routes'
 
 NProgress.configure({ showSpinner: false })
@@ -57,7 +58,18 @@ export function setupRouterGuard(router: Router) {
     }
   })
 
-  router.afterEach(() => {
+  router.afterEach((to) => {
     NProgress.done()
+
+    // 自动添加标签页（排除白名单和隐藏路由）
+    if (!whiteList.includes(to.path) && !to.meta.hidden) {
+      const tabStore = useTabStore()
+      tabStore.addTab({
+        path: to.path,
+        title: (to.meta.title as string) || '',
+        icon: (to.meta.icon as string) || '',
+        name: (to.name as string) || ''
+      })
+    }
   })
 }

@@ -1,0 +1,28 @@
+{
+  "title": "Home",
+  "userCount": "Users",
+  "roleCount": "Roles",
+  "loginCount": "Logins",
+  "systemStatus": "System Status",
+  "running": "Running",
+  "loginTrend": "Login Trend (7 Days)",
+  "loginTimes": "Login Count",
+  "systemOverview": "System Overview",
+  "recentLogin": "Recent Logins",
+  "column": {
+    "username": "Username",
+    "ip": "IP Address",
+    "location": "Location",
+    "browser": "Browser",
+    "status": "Status",
+    "loginTime": "Login Time",
+    "success": "Success",
+    "failed": "Failed"
+  },
+  "overview": {
+    "userCount": "Users",
+    "roleCount": "Roles",
+    "menuCount": "Menus",
+    "totalLogin": "Total Logins"
+  }
+}

@@ -42,3 +42,6 @@ admin-backend/*.jar
 
 # ---------- Docker ----------
 docker/mysql-data/
+
+# ---------- Superpowers ----------
+.superpowers/

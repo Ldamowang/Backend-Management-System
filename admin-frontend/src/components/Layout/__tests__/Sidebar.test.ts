@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
 import Sidebar from '../Sidebar.vue'
 
 vi.mock('vue-router', () => ({
@@ -21,6 +22,17 @@ vi.mock('@/api/modules/auth', () => ({
   getUserInfo: vi.fn()
 }))
 
+const i18n = createI18n({
+  legacy: false,
+  locale: 'zh-CN',
+  messages: {
+    'zh-CN': {
+      login: { title: '管理系统' },
+      menu: { dashboard: '仪表盘' }
+    }
+  }
+})
+
 describe('Sidebar 侧边栏', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -39,7 +51,7 @@ describe('Sidebar 侧边栏', () => {
 
   it('正确渲染侧边栏', () => {
     const wrapper = mount(Sidebar, {
-      global: { stubs }
+      global: { stubs, plugins: [i18n] }
     })
 
     expect(wrapper.find('.sidebar').exists()).toBe(true)
@@ -48,7 +60,7 @@ describe('Sidebar 侧边栏', () => {
 
   it('未折叠时显示系统名称', () => {
     const wrapper = mount(Sidebar, {
-      global: { stubs }
+      global: { stubs, plugins: [i18n] }
     })
 
     expect(wrapper.find('.logo').text()).toBe('管理系统')
@@ -56,7 +68,7 @@ describe('Sidebar 侧边栏', () => {
 
   it('包含仪表盘静态菜单', () => {
     const wrapper = mount(Sidebar, {
-      global: { stubs }
+      global: { stubs, plugins: [i18n] }
     })
 
     const menuItems = wrapper.findAll('.menu-item')

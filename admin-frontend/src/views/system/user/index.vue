@@ -2,21 +2,33 @@
   <div>
     <el-card class="search-card">
       <el-form :inline="true" :model="searchForm">
-        <el-form-item label="用户名">
-          <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable class="search-input" />
+        <el-form-item :label="$t('system.user.username')">
+          <el-input v-model="searchForm.username" :placeholder="$t('system.user.usernamePlaceholder')" clearable class="search-input" />
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="searchForm.email" placeholder="请输入邮箱" clearable class="search-input" />
+        <el-form-item :label="$t('system.user.email')">
+          <el-input v-model="searchForm.email" :placeholder="$t('system.user.emailPlaceholder')" clearable class="search-input" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择" clearable class="search-select">
-            <el-option label="启用" :value="1" />
-            <el-option label="禁用" :value="0" />
+        <el-form-item :label="$t('system.user.dept')">
+          <el-tree-select
+            v-model="searchForm.deptId"
+            :data="deptTreeData"
+            :props="{ label: 'deptName', value: 'id', children: 'children' }"
+            check-strictly
+            :render-after-expand="false"
+            :placeholder="$t('system.user.deptPlaceholder')"
+            clearable
+            class="search-select"
+          />
+        </el-form-item>
+        <el-form-item :label="$t('system.user.status')">
+          <el-select v-model="searchForm.status" :placeholder="$t('system.user.statusPlaceholder')" clearable class="search-select">
+            <el-option :label="$t('common.label.enabled')" :value="1" />
+            <el-option :label="$t('common.label.disabled')" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch"><el-icon><Search /></el-icon>搜索</el-button>
-          <el-button @click="handleReset"><el-icon><Refresh /></el-icon>重置</el-button>
+          <el-button type="primary" @click="handleSearch"><el-icon><Search /></el-icon>{{ $t('common.action.search') }}</el-button>
+          <el-button @click="handleReset"><el-icon><Refresh /></el-icon>{{ $t('common.action.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -24,13 +36,13 @@
     <el-card class="card-gap">
       <template #header>
         <div class="flex-between">
-          <span>用户列表</span>
+          <span>{{ $t('system.user.list') }}</span>
           <div>
             <el-button v-permission="'sys:user:export'" type="success" :loading="exportLoading" @click="handleExport">
-              <el-icon><Download /></el-icon>导出
+              <el-icon><Download /></el-icon>{{ $t('common.action.export') }}
             </el-button>
             <el-button v-permission="'sys:user:add'" type="primary" @click="handleAdd">
-              <el-icon><Plus /></el-icon>新增用户
+              <el-icon><Plus /></el-icon>{{ $t('system.user.addUser') }}
             </el-button>
           </div>
         </div>
@@ -38,14 +50,14 @@
 
       <el-table :data="tableData" v-loading="loading" class="table-full">
         <template #empty>
-          <el-empty description="暂无用户数据" :image-size="120" />
+          <el-empty :description="$t('system.user.noData')" :image-size="120" />
         </template>
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" min-width="120" />
-        <el-table-column prop="nickname" label="昵称" min-width="120" />
-        <el-table-column prop="email" label="邮箱" min-width="180" />
-        <el-table-column prop="phone" label="手机号" min-width="140" />
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="username" :label="$t('system.user.username')" min-width="120" />
+        <el-table-column prop="nickname" :label="$t('system.user.nickname')" min-width="120" />
+        <el-table-column prop="email" :label="$t('system.user.email')" min-width="180" />
+        <el-table-column prop="phone" :label="$t('system.user.phone')" min-width="140" />
+        <el-table-column :label="$t('system.user.status')" width="100">
           <template #default="{ row }">
             <el-switch
               :model-value="row.status"
@@ -55,11 +67,11 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="createdTime" label="创建时间" min-width="170" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column prop="createdTime" :label="$t('system.user.createTime')" min-width="170" />
+        <el-table-column :label="$t('common.label.operation')" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button v-permission="'sys:user:edit'" type="primary" size="small" link @click="handleEdit(row)">编辑</el-button>
-            <el-button v-permission="'sys:user:delete'" type="danger" size="small" link @click="handleDelete(row)">删除</el-button>
+            <el-button v-permission="'sys:user:edit'" type="primary" size="small" link @click="handleEdit(row)">{{ $t('common.action.edit') }}</el-button>
+            <el-button v-permission="'sys:user:delete'" type="danger" size="small" link @click="handleDelete(row)">{{ $t('common.action.delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -77,25 +89,37 @@
     </el-card>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="500px" @closed="resetForm">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? t('system.user.editUser') : t('system.user.addUser')" width="500px" @closed="resetForm">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" :disabled="isEdit" placeholder="请输入用户名" />
+        <el-form-item :label="$t('system.user.username')" prop="username">
+          <el-input v-model="form.username" :disabled="isEdit" :placeholder="$t('system.user.usernamePlaceholder')" />
         </el-form-item>
-        <el-form-item v-if="!isEdit" label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
+        <el-form-item v-if="!isEdit" :label="$t('system.user.password')" prop="password">
+          <el-input v-model="form.password" type="password" :placeholder="$t('system.user.passwordPlaceholder')" show-password />
         </el-form-item>
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="form.nickname" placeholder="请输入昵称" />
+        <el-form-item :label="$t('system.user.nickname')" prop="nickname">
+          <el-input v-model="form.nickname" :placeholder="$t('system.user.nicknamePlaceholder')" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" placeholder="请输入邮箱" />
+        <el-form-item :label="$t('system.user.email')" prop="email">
+          <el-input v-model="form.email" :placeholder="$t('system.user.emailPlaceholder')" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入手机号" />
+        <el-form-item :label="$t('system.user.phone')" prop="phone">
+          <el-input v-model="form.phone" :placeholder="$t('system.user.phonePlaceholder')" />
         </el-form-item>
-        <el-form-item label="角色" prop="roleIds">
-          <el-select v-model="form.roleIds" multiple placeholder="请选择角色" class="table-full">
+        <el-form-item :label="$t('system.user.dept')">
+          <el-tree-select
+            v-model="form.deptId"
+            :data="deptTreeData"
+            :props="{ label: 'deptName', value: 'id', children: 'children' }"
+            check-strictly
+            :render-after-expand="false"
+            :placeholder="$t('system.user.deptPlaceholder')"
+            clearable
+            class="table-full"
+          />
+        </el-form-item>
+        <el-form-item :label="$t('system.user.role')" prop="roleIds">
+          <el-select v-model="form.roleIds" multiple :placeholder="$t('system.user.rolePlaceholder')" class="table-full">
             <el-option
               v-for="role in roleList"
               :key="role.id"
@@ -104,13 +128,13 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item :label="$t('system.user.status')">
           <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('common.action.cancel') }}</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">{{ $t('common.action.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -118,12 +142,17 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser, updateUserStatus, exportUsers } from '@/api/modules/user'
 import { getRoleList } from '@/api/modules/role'
+import { getDeptSimpleTree } from '@/api/modules/dept'
 import { usePagination } from '@/composables/usePagination'
 import type { UserInfo, UserForm } from '@/types/user'
 import type { RoleInfo } from '@/types/role'
+import type { DeptSimpleItem } from '@/types/dept'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const submitLoading = ref(false)
@@ -135,17 +164,18 @@ const formRef = ref<FormInstance>()
 
 const { pagination, handleSizeChange, handleCurrentChange } = usePagination()
 const roleList = ref<RoleInfo[]>([])
+const deptTreeData = ref<DeptSimpleItem[]>([])
 
-const searchForm = reactive({ username: '', email: '', status: undefined as number | undefined })
+const searchForm = reactive({ username: '', email: '', status: undefined as number | undefined, deptId: undefined as number | undefined })
 
 const form = reactive<UserForm>({
-  username: '', password: '', nickname: '', email: '', phone: '', gender: 0, status: 1, roleIds: []
+  username: '', password: '', nickname: '', email: '', phone: '', gender: 0, status: 1, roleIds: [], deptId: undefined
 })
 
 const formRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  email: [{ type: 'email' as const, message: '请输入有效邮箱', trigger: 'blur' }]
+  username: [{ required: true, message: () => t('system.user.usernameRequired'), trigger: 'blur' }],
+  password: [{ required: true, message: () => t('system.user.passwordRequired'), trigger: 'blur' }],
+  email: [{ type: 'email' as const, message: () => t('system.user.emailInvalid'), trigger: 'blur' }]
 }
 
 async function fetchData() {
@@ -161,7 +191,7 @@ async function fetchData() {
 
 function handleSearch() { pagination.page = 1; fetchData() }
 function handleReset() {
-  searchForm.username = ''; searchForm.email = ''; searchForm.status = undefined
+  searchForm.username = ''; searchForm.email = ''; searchForm.status = undefined; searchForm.deptId = undefined
   pagination.page = 1; fetchData()
 }
 
@@ -172,6 +202,13 @@ async function fetchRoles() {
   } catch { /* handled by interceptor */ }
 }
 
+async function fetchDeptTree() {
+  try {
+    const { data } = await getDeptSimpleTree()
+    deptTreeData.value = data
+  } catch { /* handled by interceptor */ }
+}
+
 async function handleExport() {
   exportLoading.value = true
   try {
@@ -179,35 +216,36 @@ async function handleExport() {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = '用户列表.xlsx'
+    link.download = t('system.user.exportFileName')
     link.click()
     window.URL.revokeObjectURL(url)
-    ElMessage.success('导出成功')
+    ElMessage.success(t('common.message.exportSuccess'))
   } catch {
-    ElMessage.error('导出失败')
+    ElMessage.error(t('common.message.exportFailed'))
   } finally {
     exportLoading.value = false
   }
 }
 
-function handleAdd() { isEdit.value = false; fetchRoles(); dialogVisible.value = true }
+function handleAdd() { isEdit.value = false; fetchRoles(); fetchDeptTree(); dialogVisible.value = true }
 function handleEdit(row: UserInfo) {
   isEdit.value = true
   Object.assign(form, { ...row, password: '' })
   fetchRoles()
+  fetchDeptTree()
   dialogVisible.value = true
 }
 
 async function handleDelete(row: UserInfo) {
-  await ElMessageBox.confirm(`确定删除用户 "${row.username}"？`, '警告', { type: 'warning' })
+  await ElMessageBox.confirm(t('system.user.confirmDelete', { name: row.username }), t('common.message.warning'), { type: 'warning' })
   await deleteUser(row.id)
-  ElMessage.success('删除成功')
+  ElMessage.success(t('common.message.deleteSuccess'))
   fetchData()
 }
 
 async function handleStatusChange(id: number, status: number) {
   await updateUserStatus(id, status)
-  ElMessage.success('状态更新成功')
+  ElMessage.success(t('common.message.statusUpdateSuccess'))
   fetchData()
 }
 
@@ -220,18 +258,18 @@ async function handleSubmit() {
     } else {
       await createUser(form)
     }
-    ElMessage.success(isEdit.value ? '编辑成功' : '新增成功')
+    ElMessage.success(t(isEdit.value ? 'common.message.editSuccess' : 'common.message.addSuccess'))
     dialogVisible.value = false
     fetchData()
   } finally { submitLoading.value = false }
 }
 
 function resetForm() {
-  Object.assign(form, { id: undefined, username: '', password: '', nickname: '', email: '', phone: '', gender: 0, status: 1, roleIds: [] })
+  Object.assign(form, { id: undefined, username: '', password: '', nickname: '', email: '', phone: '', gender: 0, status: 1, roleIds: [], deptId: undefined })
   formRef.value?.resetFields()
 }
 
-onMounted(fetchData)
+onMounted(() => { fetchData(); fetchDeptTree() })
 
 // 监听分页变化 - 使用 watch 监听 pagination 变化自动刷新数据
 watch(

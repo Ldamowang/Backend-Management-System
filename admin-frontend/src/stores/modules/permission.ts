@@ -45,6 +45,7 @@ export const usePermissionStore = defineStore('permission', () => {
 
   function generateRoutes(menus: MenuItem[]): RouteRecordRaw[] {
     const routes = menus
+      .filter(m => m.path !== '/dashboard')
       .map(generateRoute)
       .filter(Boolean) as RouteRecordRaw[]
     dynamicRoutes.value = routes

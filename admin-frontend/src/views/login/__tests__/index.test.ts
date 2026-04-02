@@ -1,8 +1,31 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
 import { nextTick } from 'vue'
 import LoginPage from '../index.vue'
+
+const i18n = createI18n({
+  legacy: false,
+  locale: 'zh-CN',
+  messages: {
+    'zh-CN': {
+      login: {
+        title: '后台管理系统',
+        username: '用户名',
+        password: '密码',
+        login: '登录',
+        usernamePlaceholder: '请输入用户名',
+        passwordPlaceholder: '请输入密码',
+        usernameRequired: '请输入用户名',
+        passwordRequired: '请输入密码',
+        remember: '记住密码',
+        loginSuccess: '登录成功',
+        loginFailed: '登录失败'
+      }
+    }
+  }
+})
 
 // mock vue-router
 const mockPush = vi.fn()
@@ -45,6 +68,7 @@ describe('Login 登录页', () => {
   it('正确渲染登录表单', () => {
     const wrapper = mount(LoginPage, {
       global: {
+        plugins: [i18n],
         stubs: {
           'el-form': { template: '<form><slot /></form>' },
           'el-form-item': { template: '<div><slot /></div>' },
@@ -63,6 +87,7 @@ describe('Login 登录页', () => {
   it('包含用户名和密码输入框', () => {
     const wrapper = mount(LoginPage, {
       global: {
+        plugins: [i18n],
         stubs: {
           'el-form': { template: '<form><slot /></form>' },
           'el-form-item': { template: '<div class="form-item"><slot /></div>' },
@@ -80,6 +105,7 @@ describe('Login 登录页', () => {
   it('包含记住密码复选框', () => {
     const wrapper = mount(LoginPage, {
       global: {
+        plugins: [i18n],
         stubs: {
           'el-form': { template: '<form><slot /></form>' },
           'el-form-item': { template: '<div><slot /></div>' },
@@ -96,6 +122,7 @@ describe('Login 登录页', () => {
   it('包含登录按钮', () => {
     const wrapper = mount(LoginPage, {
       global: {
+        plugins: [i18n],
         stubs: {
           'el-form': { template: '<form><slot /></form>' },
           'el-form-item': { template: '<div><slot /></div>' },
@@ -106,7 +133,7 @@ describe('Login 登录页', () => {
       }
     })
 
-    expect(wrapper.find('.login-btn').text()).toContain('登 录')
+    expect(wrapper.find('.login-btn').text()).toContain('登录')
   })
 
   it('登录成功后跳转首页', async () => {
@@ -114,6 +141,7 @@ describe('Login 登录页', () => {
 
     const wrapper = mount(LoginPage, {
       global: {
+        plugins: [i18n],
         stubs: {
           'el-form': {
             template: '<form><slot /></form>',

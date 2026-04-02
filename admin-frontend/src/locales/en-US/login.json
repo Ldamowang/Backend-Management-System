@@ -1,0 +1,13 @@
+{
+  "title": "Admin System",
+  "username": "Username",
+  "password": "Password",
+  "login": "Login",
+  "usernamePlaceholder": "Enter username",
+  "passwordPlaceholder": "Enter password",
+  "usernameRequired": "Please enter username",
+  "passwordRequired": "Please enter password",
+  "remember": "Remember me",
+  "loginSuccess": "Login successful",
+  "loginFailed": "Login failed"
+}

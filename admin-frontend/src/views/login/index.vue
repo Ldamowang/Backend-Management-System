@@ -1,27 +1,27 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h2 class="login-title">后台管理系统</h2>
+      <h2 class="login-title">{{ $t('login.title') }}</h2>
       <el-form ref="formRef" :model="loginForm" :rules="rules" size="large">
         <el-form-item prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名" prefix-icon="User" />
+          <el-input v-model="loginForm.username" :placeholder="$t('login.usernamePlaceholder')" prefix-icon="User" />
         </el-form-item>
         <el-form-item prop="password">
           <el-input
             v-model="loginForm.password"
             type="password"
-            placeholder="请输入密码"
+            :placeholder="$t('login.passwordPlaceholder')"
             prefix-icon="Lock"
             show-password
             @keyup.enter="handleLogin"
           />
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
+          <el-checkbox v-model="loginForm.remember">{{ $t('login.remember') }}</el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="loading" class="table-full" @click="handleLogin">
-            登 录
+            {{ $t('login.login') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -32,9 +32,11 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, type FormInstance } from 'element-plus'
 import { useUserStore } from '@/stores/modules/user'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
@@ -49,8 +51,8 @@ const loginForm = reactive({
 })
 
 const rules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  username: [{ required: true, message: t('login.usernameRequired'), trigger: 'blur' }],
+  password: [{ required: true, message: t('login.passwordRequired'), trigger: 'blur' }]
 }
 
 async function handleLogin() {
@@ -58,11 +60,11 @@ async function handleLogin() {
     await formRef.value?.validate()
     loading.value = true
     await userStore.login(loginForm)
-    ElMessage.success('登录成功')
+    ElMessage.success(t('login.loginSuccess'))
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : '登录失败'
+    const message = error instanceof Error ? error.message : t('login.loginFailed')
     ElMessage.error(message)
   } finally {
     loading.value = false

@@ -59,6 +59,19 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername());
         String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getUsername());
 
+        // 记录在线用户
+        Map<String, Object> onlineInfo = new HashMap<>();
+        onlineInfo.put("userId", user.getId());
+        onlineInfo.put("username", user.getUsername());
+        onlineInfo.put("nickname", user.getNickname());
+        onlineInfo.put("loginTime", LocalDateTime.now().toString());
+        redisTemplate.opsForValue().set(
+                CacheConstants.ONLINE_USER_PREFIX + accessToken,
+                onlineInfo,
+                jwtUtil.getAccessTokenExpiration(),
+                TimeUnit.MILLISECONDS
+        );
+
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -79,6 +92,8 @@ public class AuthServiceImpl implements AuthService {
                     jwtUtil.getAccessTokenExpiration(),
                     TimeUnit.MILLISECONDS
             );
+            // 移除在线用户记录
+            redisTemplate.delete(CacheConstants.ONLINE_USER_PREFIX + token);
         }
     }
 

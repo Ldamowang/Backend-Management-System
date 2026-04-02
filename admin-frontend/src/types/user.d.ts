@@ -4,6 +4,7 @@ export interface UserInfo {
   id: number
   username: string
   nickname: string
+  deptId: number
   email: string
   phone: string
   avatar: string
@@ -19,6 +20,7 @@ export interface UserForm {
   username: string
   password?: string
   nickname: string
+  deptId?: number
   email: string
   phone: string
   gender: number
@@ -30,6 +32,7 @@ export interface UserQuery extends PageQuery {
   username?: string
   email?: string
   status?: number | string
+  deptId?: number
 }
 
 export interface LoginForm {

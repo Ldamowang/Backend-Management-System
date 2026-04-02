@@ -21,4 +21,6 @@ public class UserQueryDTO extends PageQuery {
     @Min(value = 0, message = "状态值无效")
     @Max(value = 1, message = "状态值无效")
     private Integer status;
+
+    private Long deptId;
 }

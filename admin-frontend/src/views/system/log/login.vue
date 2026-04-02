@@ -1,23 +1,23 @@
 <template>
   <div>
     <el-card>
-      <template #header><span>登录日志</span></template>
+      <template #header><span>{{ $t('system.log.login') }}</span></template>
       <el-table :data="tableData" v-loading="loading" class="table-full">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="ip" label="IP地址" width="140" />
-        <el-table-column prop="location" label="登录地点" min-width="160" />
-        <el-table-column prop="browser" label="浏览器" min-width="140" />
-        <el-table-column prop="os" label="操作系统" min-width="140" />
-        <el-table-column label="状态" width="80">
+        <el-table-column prop="username" :label="$t('system.log.username')" width="120" />
+        <el-table-column prop="ip" :label="$t('system.log.ip')" width="140" />
+        <el-table-column prop="location" :label="$t('system.log.loginLocation')" min-width="160" />
+        <el-table-column prop="browser" :label="$t('system.log.browser')" min-width="140" />
+        <el-table-column prop="os" :label="$t('system.log.os')" min-width="140" />
+        <el-table-column :label="$t('common.label.status')" width="80">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
-              {{ row.status === 1 ? '成功' : '失败' }}
+              {{ row.status === 1 ? $t('common.label.success') : $t('common.label.failed') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="message" label="消息" min-width="160" show-overflow-tooltip />
-        <el-table-column prop="loginTime" label="登录时间" min-width="170" />
+        <el-table-column prop="message" :label="$t('system.log.logMessage')" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="loginTime" :label="$t('system.log.loginTime')" min-width="170" />
       </el-table>
 
       <el-pagination
@@ -36,9 +36,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getLoginLogs, type LoginLog } from '@/api/modules/log'
 import { usePagination } from '@/composables/usePagination'
 
+const { t } = useI18n()
 const loading = ref(false)
 const tableData = ref<LoginLog[]>([])
 const { pagination } = usePagination()

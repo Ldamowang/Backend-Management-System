@@ -1,0 +1,19 @@
+{
+  "dashboard": "仪表盘",
+  "system": "系统管理",
+  "user": "用户管理",
+  "role": "角色管理",
+  "menu": "菜单管理",
+  "config": "系统配置",
+  "log": "日志管理",
+  "operationLog": "操作日志",
+  "loginLog": "登录日志",
+  "dept": "部门管理",
+  "dict": "字典管理",
+  "online": "在线用户",
+  "file": "文件管理",
+  "notice": "通知公告",
+  "job": "定时任务",
+  "monitor": "系统监控",
+  "profile": "个人中心"
+}

@@ -28,6 +28,8 @@ public class UserCreateDTO {
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String phone;
 
+    private Long deptId;
+
     private Integer gender = 0;
 
     private Integer status = 1;

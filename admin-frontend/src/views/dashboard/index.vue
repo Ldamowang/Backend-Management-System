@@ -19,7 +19,7 @@
     <el-row :gutter="20" class="card-gap">
       <el-col :span="12">
         <el-card>
-          <template #header><span>近7日登录趋势</span></template>
+          <template #header><span>{{ $t('dashboard.loginTrend') }}</span></template>
           <div class="chart-container">
             <v-chart :option="loginTrendOption" autoresize />
           </div>
@@ -27,7 +27,7 @@
       </el-col>
       <el-col :span="12">
         <el-card>
-          <template #header><span>系统概览</span></template>
+          <template #header><span>{{ $t('dashboard.systemOverview') }}</span></template>
           <div class="chart-container">
             <v-chart :option="overviewOption" autoresize />
           </div>
@@ -36,20 +36,20 @@
     </el-row>
 
     <el-card class="card-gap">
-      <template #header><span>最近登录记录</span></template>
+      <template #header><span>{{ $t('dashboard.recentLogin') }}</span></template>
       <el-table :data="recentLogs" class="table-full" size="small">
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="ip" label="IP地址" width="140" />
-        <el-table-column prop="location" label="登录地点" min-width="140" />
-        <el-table-column prop="browser" label="浏览器" min-width="120" />
-        <el-table-column label="状态" width="80">
+        <el-table-column prop="username" :label="$t('dashboard.column.username')" width="120" />
+        <el-table-column prop="ip" :label="$t('dashboard.column.ip')" width="140" />
+        <el-table-column prop="location" :label="$t('dashboard.column.location')" min-width="140" />
+        <el-table-column prop="browser" :label="$t('dashboard.column.browser')" min-width="120" />
+        <el-table-column :label="$t('dashboard.column.status')" width="80">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
-              {{ row.status === 1 ? '成功' : '失败' }}
+              {{ row.status === 1 ? $t('dashboard.column.success') : $t('dashboard.column.failed') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="loginTime" label="登录时间" min-width="170" />
+        <el-table-column prop="loginTime" :label="$t('dashboard.column.loginTime')" min-width="170" />
       </el-table>
     </el-card>
   </div>
@@ -57,6 +57,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -70,16 +71,18 @@ import {
 import { getStats, type DashboardStats } from '@/api/modules/dashboard'
 import { getLoginLogs, type LoginLog } from '@/api/modules/log'
 
+const { t } = useI18n()
+
 use([CanvasRenderer, LineChart, BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent])
 
 const statsData = ref<DashboardStats>({ userCount: 0, roleCount: 0, menuCount: 0, todayLoginCount: 0, totalLoginCount: 0 })
 const recentLogs = ref<LoginLog[]>([])
 
 const stats = computed(() => [
-  { label: '用户总数', value: statsData.value.userCount.toLocaleString(), icon: 'User', color: '#409EFF', bgColor: 'rgba(64,158,255,0.1)' },
-  { label: '角色数量', value: statsData.value.roleCount.toLocaleString(), icon: 'UserFilled', color: '#67C23A', bgColor: 'rgba(103,194,58,0.1)' },
-  { label: '登录总数', value: statsData.value.totalLoginCount.toLocaleString(), icon: 'Monitor', color: '#E6A23C', bgColor: 'rgba(230,162,60,0.1)' },
-  { label: '系统状态', value: '运行中', icon: 'CircleCheck', color: '#67C23A', bgColor: 'rgba(103,194,58,0.1)' }
+  { label: t('dashboard.userCount'), value: statsData.value.userCount.toLocaleString(), icon: 'User', color: '#409EFF', bgColor: 'rgba(64,158,255,0.1)' },
+  { label: t('dashboard.roleCount'), value: statsData.value.roleCount.toLocaleString(), icon: 'UserFilled', color: '#67C23A', bgColor: 'rgba(103,194,58,0.1)' },
+  { label: t('dashboard.loginCount'), value: statsData.value.totalLoginCount.toLocaleString(), icon: 'Monitor', color: '#E6A23C', bgColor: 'rgba(230,162,60,0.1)' },
+  { label: t('dashboard.systemStatus'), value: t('dashboard.running'), icon: 'CircleCheck', color: '#67C23A', bgColor: 'rgba(103,194,58,0.1)' }
 ])
 
 // 近7日登录趋势图
@@ -96,7 +99,7 @@ const loginTrendOption = computed(() => ({
   },
   yAxis: { type: 'value', minInterval: 1 },
   series: [{
-    name: '登录次数',
+    name: t('dashboard.loginTimes'),
     type: 'line',
     smooth: true,
     areaStyle: { opacity: 0.15 },
@@ -111,7 +114,7 @@ const overviewOption = computed(() => ({
   grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
   xAxis: {
     type: 'category',
-    data: ['用户数', '角色数', '菜单数', '登录总量']
+    data: [t('dashboard.overview.userCount'), t('dashboard.overview.roleCount'), t('dashboard.overview.menuCount'), t('dashboard.overview.totalLogin')]
   },
   yAxis: { type: 'value' },
   series: [{

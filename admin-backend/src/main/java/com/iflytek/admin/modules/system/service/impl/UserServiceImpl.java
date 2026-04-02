@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService {
         if (query.getStatus() != null) {
             wrapper.eq(SysUser::getStatus, query.getStatus());
         }
+        if (query.getDeptId() != null) {
+            wrapper.eq(SysUser::getDeptId, query.getDeptId());
+        }
         wrapper.orderByDesc(SysUser::getCreatedTime);
 
         Page<SysUser> page = userMapper.selectPage(
@@ -71,6 +74,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setNickname(dto.getNickname());
+        user.setDeptId(dto.getDeptId());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
         user.setGender(dto.getGender());
@@ -87,6 +91,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) throw new BusinessException(ResultCode.USER_NOT_FOUND);
 
         if (dto.getNickname() != null) user.setNickname(dto.getNickname());
+        if (dto.getDeptId() != null) user.setDeptId(dto.getDeptId());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
         if (dto.getGender() != null) user.setGender(dto.getGender());
@@ -126,6 +131,9 @@ public class UserServiceImpl implements UserService {
         if (query.getStatus() != null) {
             wrapper.eq(SysUser::getStatus, query.getStatus());
         }
+        if (query.getDeptId() != null) {
+            wrapper.eq(SysUser::getDeptId, query.getDeptId());
+        }
         wrapper.orderByDesc(SysUser::getCreatedTime);
         wrapper.last("LIMIT " + EXPORT_MAX_ROWS);
 
@@ -149,6 +157,7 @@ public class UserServiceImpl implements UserService {
         map.put("id", user.getId());
         map.put("username", user.getUsername());
         map.put("nickname", user.getNickname());
+        map.put("deptId", user.getDeptId());
         map.put("email", user.getEmail());
         map.put("phone", user.getPhone());
         map.put("avatar", user.getAvatar());
