@@ -34,6 +34,7 @@ public class JobRunner {
             String methodName = invokeTarget.substring(lastDot + 1);
 
             Object bean = applicationContext.getBean(beanName);
+            // 仅支持无参方法，带参方法会抛出 NoSuchMethodException（参见 @ScheduledTarget 约束）
             Method method = bean.getClass().getMethod(methodName);
 
             if (!method.isAnnotationPresent(ScheduledTarget.class)) {

@@ -2,10 +2,14 @@ package com.iflytek.admin.common.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -79,15 +83,24 @@ public class CacheService {
     }
 
     /**
-     * 按前缀批量删除缓存
+     * 按前缀批量删除缓存（使用 SCAN 代替 KEYS，避免阻塞 Redis）
      *
      * @param prefix 缓存键前缀
      */
     public void deleteByPrefix(String prefix) {
         try {
-            Set<String> keys = redisTemplate.keys(prefix + "*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
+            ScanOptions options = ScanOptions.scanOptions()
+                    .match(prefix + "*")
+                    .count(200)
+                    .build();
+            List<String> keysToDelete = new ArrayList<>();
+            try (Cursor<String> cursor = redisTemplate.scan(options)) {
+                while (cursor.hasNext()) {
+                    keysToDelete.add(cursor.next());
+                }
+            }
+            if (!keysToDelete.isEmpty()) {
+                redisTemplate.delete(keysToDelete);
             }
         } catch (Exception e) {
             log.warn("按前缀删除缓存失败, prefix={}", prefix, e);

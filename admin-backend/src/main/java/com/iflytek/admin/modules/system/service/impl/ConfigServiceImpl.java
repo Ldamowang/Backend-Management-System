@@ -8,6 +8,7 @@ import com.iflytek.admin.modules.system.mapper.SysConfigMapper;
 import com.iflytek.admin.modules.system.service.ConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class ConfigServiceImpl implements ConfigService {
         List<SysConfig> cached = cacheService.getAsList(CacheConstants.CONFIG_ALL_KEY);
         if (cached != null) return cached;
         List<SysConfig> configs = configMapper.selectList(null);
-        cacheService.set(CacheConstants.CONFIG_ALL_KEY, configs, 86400);
+        cacheService.set(CacheConstants.CONFIG_ALL_KEY, configs, CacheConstants.CONFIG_TTL);
         return configs;
     }
 
@@ -36,12 +37,13 @@ public class ConfigServiceImpl implements ConfigService {
                 new LambdaQueryWrapper<SysConfig>().eq(SysConfig::getConfigKey, key));
         String value = config != null ? config.getConfigValue() : null;
         if (value != null) {
-            cacheService.set(cacheKey, value, 86400);
+            cacheService.set(cacheKey, value, CacheConstants.CONFIG_TTL);
         }
         return value;
     }
 
     @Override
+    @Transactional
     public void batchUpdate(List<SysConfig> configs) {
         configs.forEach(configMapper::updateById);
         cacheService.delete(CacheConstants.CONFIG_ALL_KEY);

@@ -77,7 +77,7 @@ public class JobServiceImpl implements JobService {
         job.setStatus(status);
         jobMapper.updateById(job);
         if (Integer.valueOf(1).equals(status)) {
-            taskManager.addTask(job);
+            taskManager.updateTask(job);
         } else {
             taskManager.removeTask(id);
         }

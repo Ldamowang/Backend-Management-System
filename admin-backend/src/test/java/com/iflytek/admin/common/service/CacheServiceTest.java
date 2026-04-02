@@ -1,6 +1,5 @@
 package com.iflytek.admin.common.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,10 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -120,11 +122,23 @@ class CacheServiceTest {
     @DisplayName("deleteByPrefix() 方法测试")
     class DeleteByPrefixTests {
 
+        @SuppressWarnings("unchecked")
+        private Cursor<String> mockCursor(List<String> keys) {
+            Cursor<String> cursor = mock(Cursor.class);
+            Iterator<String> iterator = keys.iterator();
+            when(cursor.hasNext()).thenAnswer(inv -> iterator.hasNext());
+            if (!keys.isEmpty()) {
+                when(cursor.next()).thenAnswer(inv -> iterator.next());
+            }
+            return cursor;
+        }
+
         @Test
         @DisplayName("找到匹配key - 批量删除")
         void deleteByPrefix_findsAndDeletes() {
-            Set<String> keys = Set.of("dict:data:gender", "dict:data:status");
-            when(redisTemplate.keys("dict:data:*")).thenReturn(keys);
+            List<String> keys = List.of("dict:data:gender", "dict:data:status");
+            Cursor<String> cursor = mockCursor(keys);
+            when(redisTemplate.scan(any(ScanOptions.class))).thenReturn(cursor);
 
             cacheService.deleteByPrefix("dict:data:");
 
@@ -134,7 +148,8 @@ class CacheServiceTest {
         @Test
         @DisplayName("无匹配key - 不调用delete")
         void deleteByPrefix_noKeys_noDeleteCall() {
-            when(redisTemplate.keys("empty:*")).thenReturn(Collections.emptySet());
+            Cursor<String> cursor = mockCursor(Collections.emptyList());
+            when(redisTemplate.scan(any(ScanOptions.class))).thenReturn(cursor);
 
             cacheService.deleteByPrefix("empty:");
 
@@ -142,10 +157,11 @@ class CacheServiceTest {
         }
 
         @Test
-        @DisplayName("keys返回null - 不调用delete")
-        void deleteByPrefix_nullKeys_noDeleteCall() {
-            when(redisTemplate.keys("null:*")).thenReturn(null);
+        @DisplayName("scan返回null - 静默失败")
+        void deleteByPrefix_nullCursor_silentlyFails() {
+            when(redisTemplate.scan(any(ScanOptions.class))).thenReturn(null);
 
+            // 不应抛出异常（会被 catch 捕获）
             cacheService.deleteByPrefix("null:");
 
             verify(redisTemplate, never()).delete(anyCollection());
@@ -154,7 +170,7 @@ class CacheServiceTest {
         @Test
         @DisplayName("Redis异常 - 静默失败")
         void deleteByPrefix_redisError_silentlyFails() {
-            when(redisTemplate.keys(anyString())).thenThrow(new RuntimeException("Redis connection failed"));
+            when(redisTemplate.scan(any(ScanOptions.class))).thenThrow(new RuntimeException("Redis connection failed"));
 
             // 不应抛出异常
             cacheService.deleteByPrefix("error:");

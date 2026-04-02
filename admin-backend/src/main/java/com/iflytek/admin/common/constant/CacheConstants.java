@@ -13,4 +13,11 @@ public final class CacheConstants {
     public static final String CONFIG_PREFIX = "config:";
     public static final String MENU_USER_PREFIX = "menu:user:";
     public static final String PERM_USER_PREFIX = "perm:user:";
+
+    /** 字典缓存 TTL：24 小时（秒） */
+    public static final long DICT_TTL = 86400;
+    /** 系统配置缓存 TTL：24 小时（秒） */
+    public static final long CONFIG_TTL = 86400;
+    /** 菜单/权限缓存 TTL：2 小时（秒） */
+    public static final long MENU_PERM_TTL = 7200;
 }

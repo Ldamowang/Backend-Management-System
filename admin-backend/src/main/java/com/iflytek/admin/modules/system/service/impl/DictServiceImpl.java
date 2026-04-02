@@ -31,7 +31,7 @@ public class DictServiceImpl implements DictService {
         if (cached != null) return cached;
         List<SysDictType> types = dictTypeMapper.selectList(new LambdaQueryWrapper<SysDictType>()
                 .orderByDesc(SysDictType::getCreatedTime));
-        cacheService.set(CacheConstants.DICT_TYPES_KEY, types, 86400);
+        cacheService.set(CacheConstants.DICT_TYPES_KEY, types, CacheConstants.DICT_TTL);
         return types;
     }
 
@@ -58,6 +58,7 @@ public class DictServiceImpl implements DictService {
     }
 
     @Override
+    @Transactional
     public void updateType(Long id, DictTypeFormDTO dto) {
         SysDictType type = dictTypeMapper.selectById(id);
         if (type == null) throw new BusinessException(404, "字典类型不存在");
@@ -102,7 +103,7 @@ public class DictServiceImpl implements DictService {
         List<SysDictData> data = dictDataMapper.selectList(new LambdaQueryWrapper<SysDictData>()
                 .eq(SysDictData::getDictType, dictType)
                 .orderByAsc(SysDictData::getSortOrder));
-        cacheService.set(key, data, 86400);
+        cacheService.set(key, data, CacheConstants.DICT_TTL);
         return data;
     }
 

@@ -135,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
         List<String> permissions = cacheService.getAsList(permCacheKey);
         if (permissions == null) {
             permissions = userMapper.selectUserPermissions(userId);
-            cacheService.set(permCacheKey, permissions, 7200);
+            cacheService.set(permCacheKey, permissions, CacheConstants.MENU_PERM_TTL);
         }
 
         // 获取用户角色ID列表
@@ -149,7 +149,7 @@ public class AuthServiceImpl implements AuthService {
         if (menuTree == null) {
             List<SysMenu> menus = roleIds.isEmpty() ? List.of() : menuMapper.selectMenusByRoleIds(roleIds);
             menuTree = buildMenuTree(menus, 0L);
-            cacheService.set(menuCacheKey, menuTree, 7200);
+            cacheService.set(menuCacheKey, menuTree, CacheConstants.MENU_PERM_TTL);
         }
 
         Map<String, Object> userInfo = new HashMap<>();
