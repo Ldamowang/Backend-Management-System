@@ -2,6 +2,7 @@ package com.iflytek.admin.modules.auth.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.iflytek.admin.common.exception.BusinessException;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.common.utils.JwtUtil;
 import com.iflytek.admin.modules.auth.dto.LoginRequest;
 import com.iflytek.admin.modules.auth.dto.LoginResponse;
@@ -46,6 +47,7 @@ class AuthServiceImplTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private RedisTemplate<String, Object> redisTemplate;
     @Mock private ValueOperations<String, Object> valueOperations;
+    @Mock private CacheService cacheService;
 
     private SysUser testUser;
 
@@ -75,6 +77,7 @@ class AuthServiceImplTest {
             when(jwtUtil.generateAccessToken(1L, "admin")).thenReturn("access-token");
             when(jwtUtil.generateRefreshToken(1L, "admin")).thenReturn("refresh-token");
             when(jwtUtil.getAccessTokenExpiration()).thenReturn(1800000L);
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
             LoginResponse response = authService.login(request);
 

@@ -1,7 +1,9 @@
 package com.iflytek.admin.modules.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.iflytek.admin.common.constant.CacheConstants;
 import com.iflytek.admin.common.exception.BusinessException;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.modules.system.dto.MenuFormDTO;
 import com.iflytek.admin.modules.system.entity.SysMenu;
 import com.iflytek.admin.modules.system.mapper.SysMenuMapper;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 public class MenuServiceImpl implements MenuService {
 
     private final SysMenuMapper menuMapper;
+    private final CacheService cacheService;
 
     @Override
     public List<Map<String, Object>> getMenuTree() {
@@ -35,6 +38,8 @@ public class MenuServiceImpl implements MenuService {
         SysMenu menu = new SysMenu();
         applyDTO(menu, dto);
         menuMapper.insert(menu);
+        cacheService.deleteByPrefix(CacheConstants.MENU_USER_PREFIX);
+        cacheService.deleteByPrefix(CacheConstants.PERM_USER_PREFIX);
     }
 
     @Override
@@ -43,6 +48,8 @@ public class MenuServiceImpl implements MenuService {
         if (menu == null) throw new BusinessException(404, "菜单不存在");
         applyDTO(menu, dto);
         menuMapper.updateById(menu);
+        cacheService.deleteByPrefix(CacheConstants.MENU_USER_PREFIX);
+        cacheService.deleteByPrefix(CacheConstants.PERM_USER_PREFIX);
     }
 
     @Override
@@ -50,6 +57,8 @@ public class MenuServiceImpl implements MenuService {
         Long count = menuMapper.selectCount(new LambdaQueryWrapper<SysMenu>().eq(SysMenu::getParentId, id));
         if (count > 0) throw new BusinessException(400, "存在子菜单，无法删除");
         menuMapper.deleteById(id);
+        cacheService.deleteByPrefix(CacheConstants.MENU_USER_PREFIX);
+        cacheService.deleteByPrefix(CacheConstants.PERM_USER_PREFIX);
     }
 
     private void applyDTO(SysMenu menu, MenuFormDTO dto) {

@@ -1,7 +1,9 @@
 package com.iflytek.admin.modules.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.iflytek.admin.common.constant.CacheConstants;
 import com.iflytek.admin.common.exception.BusinessException;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.modules.system.dto.RoleFormDTO;
 import com.iflytek.admin.modules.system.entity.SysRole;
 import com.iflytek.admin.modules.system.entity.SysRoleMenu;
@@ -20,6 +22,7 @@ public class RoleServiceImpl implements RoleService {
 
     private final SysRoleMapper roleMapper;
     private final SysRoleMenuMapper roleMenuMapper;
+    private final CacheService cacheService;
 
     @Override
     public List<SysRole> list() {
@@ -54,12 +57,16 @@ public class RoleServiceImpl implements RoleService {
         if (dto.getStatus() != null) role.setStatus(dto.getStatus());
         if (dto.getDescription() != null) role.setDescription(dto.getDescription());
         roleMapper.updateById(role);
+        cacheService.deleteByPrefix(CacheConstants.MENU_USER_PREFIX);
+        cacheService.deleteByPrefix(CacheConstants.PERM_USER_PREFIX);
     }
 
     @Override
     public void delete(Long id) {
         roleMapper.deleteById(id);
         roleMenuMapper.delete(new LambdaQueryWrapper<SysRoleMenu>().eq(SysRoleMenu::getRoleId, id));
+        cacheService.deleteByPrefix(CacheConstants.MENU_USER_PREFIX);
+        cacheService.deleteByPrefix(CacheConstants.PERM_USER_PREFIX);
     }
 
     @Override
@@ -74,5 +81,7 @@ public class RoleServiceImpl implements RoleService {
                 roleMenuMapper.insert(rm);
             });
         }
+        cacheService.deleteByPrefix(CacheConstants.MENU_USER_PREFIX);
+        cacheService.deleteByPrefix(CacheConstants.PERM_USER_PREFIX);
     }
 }

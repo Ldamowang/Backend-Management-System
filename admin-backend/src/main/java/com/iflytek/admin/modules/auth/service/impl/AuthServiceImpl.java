@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.iflytek.admin.common.constant.CacheConstants;
 import com.iflytek.admin.common.exception.BusinessException;
 import com.iflytek.admin.common.result.ResultCode;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.common.utils.JwtUtil;
 import com.iflytek.admin.modules.auth.dto.LoginRequest;
 import com.iflytek.admin.modules.auth.dto.LoginResponse;
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CacheService cacheService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -127,16 +129,28 @@ public class AuthServiceImpl implements AuthService {
         if (user == null) throw new BusinessException(ResultCode.USER_NOT_FOUND);
 
         List<String> roles = userMapper.selectUserRoles(userId);
-        List<String> permissions = userMapper.selectUserPermissions(userId);
+
+        // 从缓存获取权限列表
+        String permCacheKey = CacheConstants.PERM_USER_PREFIX + userId;
+        List<String> permissions = cacheService.getAsList(permCacheKey);
+        if (permissions == null) {
+            permissions = userMapper.selectUserPermissions(userId);
+            cacheService.set(permCacheKey, permissions, 7200);
+        }
 
         // 获取用户角色ID列表
         List<SysUserRole> userRoles = userRoleMapper.selectList(
                 new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, userId));
         List<Long> roleIds = userRoles.stream().map(SysUserRole::getRoleId).collect(Collectors.toList());
 
-        // 获取菜单树
-        List<SysMenu> menus = roleIds.isEmpty() ? List.of() : menuMapper.selectMenusByRoleIds(roleIds);
-        List<Map<String, Object>> menuTree = buildMenuTree(menus, 0L);
+        // 从缓存获取菜单树
+        String menuCacheKey = CacheConstants.MENU_USER_PREFIX + userId;
+        List<Map<String, Object>> menuTree = cacheService.getAsList(menuCacheKey);
+        if (menuTree == null) {
+            List<SysMenu> menus = roleIds.isEmpty() ? List.of() : menuMapper.selectMenusByRoleIds(roleIds);
+            menuTree = buildMenuTree(menus, 0L);
+            cacheService.set(menuCacheKey, menuTree, 7200);
+        }
 
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("id", user.getId());

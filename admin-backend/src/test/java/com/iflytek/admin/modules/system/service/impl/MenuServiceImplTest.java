@@ -1,6 +1,7 @@
 package com.iflytek.admin.modules.system.service.impl;
 
 import com.iflytek.admin.common.exception.BusinessException;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.modules.system.dto.MenuFormDTO;
 import com.iflytek.admin.modules.system.entity.SysMenu;
 import com.iflytek.admin.modules.system.mapper.SysMenuMapper;
@@ -27,6 +28,7 @@ class MenuServiceImplTest {
     private MenuServiceImpl menuService;
 
     @Mock private SysMenuMapper menuMapper;
+    @Mock private CacheService cacheService;
 
     private SysMenu parentMenu;
     private SysMenu childMenu;

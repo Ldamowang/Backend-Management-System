@@ -1,6 +1,7 @@
 package com.iflytek.admin.modules.system.service.impl;
 
 import com.iflytek.admin.common.exception.BusinessException;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.modules.system.dto.RoleFormDTO;
 import com.iflytek.admin.modules.system.entity.SysRole;
 import com.iflytek.admin.modules.system.entity.SysRoleMenu;
@@ -29,6 +30,7 @@ class RoleServiceImplTest {
 
     @Mock private SysRoleMapper roleMapper;
     @Mock private SysRoleMenuMapper roleMenuMapper;
+    @Mock private CacheService cacheService;
 
     private SysRole testRole;
 
