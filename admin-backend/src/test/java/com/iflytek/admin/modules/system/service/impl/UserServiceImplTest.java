@@ -8,6 +8,7 @@ import com.iflytek.admin.modules.system.dto.UserUpdateDTO;
 import com.iflytek.admin.modules.system.entity.SysUser;
 import com.iflytek.admin.modules.system.mapper.SysUserMapper;
 import com.iflytek.admin.modules.system.mapper.SysUserRoleMapper;
+import com.iflytek.admin.modules.system.service.PasswordPolicyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,7 @@ class UserServiceImplTest {
     @Mock private SysUserMapper userMapper;
     @Mock private SysUserRoleMapper userRoleMapper;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private PasswordPolicyService passwordPolicyService;
 
     private SysUser testUser;
 
@@ -89,12 +92,14 @@ class UserServiceImplTest {
             dto.setRoleIds(List.of(1L, 2L));
 
             when(userMapper.selectUserByUsername("newuser")).thenReturn(null);
+            when(passwordPolicyService.validate("password123")).thenReturn(Collections.emptyList());
             when(passwordEncoder.encode("password123")).thenReturn("$2a$encoded");
 
             userService.create(dto);
 
             verify(userMapper).insert(any(SysUser.class));
             verify(userRoleMapper, times(2)).insert(any());
+            verify(passwordPolicyService).recordHistory(any(), eq("$2a$encoded"));
         }
 
         @Test
@@ -343,6 +348,7 @@ class UserServiceImplTest {
             dto.setNickname("新用户");
 
             when(userMapper.selectUserByUsername("newuser")).thenReturn(null);
+            when(passwordPolicyService.validate("password123")).thenReturn(Collections.emptyList());
             when(passwordEncoder.encode("password123")).thenReturn("$2a$encoded");
 
             userService.create(dto);

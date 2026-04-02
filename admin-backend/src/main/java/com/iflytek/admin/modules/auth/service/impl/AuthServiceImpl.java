@@ -11,6 +11,7 @@ import com.iflytek.admin.modules.auth.dto.LoginResponse;
 import com.iflytek.admin.modules.auth.service.AuthService;
 import com.iflytek.admin.modules.system.entity.*;
 import com.iflytek.admin.modules.system.mapper.*;
+import com.iflytek.admin.modules.system.service.PasswordPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, Object> redisTemplate;
     private final CacheService cacheService;
+    private final PasswordPolicyService passwordPolicyService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -74,11 +76,14 @@ public class AuthServiceImpl implements AuthService {
                 TimeUnit.MILLISECONDS
         );
 
+        boolean passwordExpired = passwordPolicyService.isExpired(user);
+
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
                 .expiresIn(jwtUtil.getAccessTokenExpiration() / 1000)
+                .passwordExpired(passwordExpired)
                 .build();
     }
 

@@ -12,6 +12,7 @@ import com.iflytek.admin.modules.system.entity.SysUser;
 import com.iflytek.admin.modules.system.entity.SysUserRole;
 import com.iflytek.admin.modules.system.mapper.SysUserMapper;
 import com.iflytek.admin.modules.system.mapper.SysUserRoleMapper;
+import com.iflytek.admin.modules.system.service.PasswordPolicyService;
 import com.iflytek.admin.modules.system.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final SysUserMapper userMapper;
     private final SysUserRoleMapper userRoleMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordPolicyService passwordPolicyService;
 
     @Override
     public PageResult<Map<String, Object>> page(UserQueryDTO query) {
@@ -70,6 +73,11 @@ public class UserServiceImpl implements UserService {
         SysUser exists = userMapper.selectUserByUsername(dto.getUsername());
         if (exists != null) throw new BusinessException(ResultCode.USERNAME_EXISTS);
 
+        List<String> errors = passwordPolicyService.validate(dto.getPassword());
+        if (!errors.isEmpty()) {
+            throw new BusinessException(400, String.join("; ", errors));
+        }
+
         SysUser user = new SysUser();
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -82,6 +90,7 @@ public class UserServiceImpl implements UserService {
         userMapper.insert(user);
 
         saveUserRoles(user.getId(), dto.getRoleIds());
+        passwordPolicyService.recordHistory(user.getId(), user.getPassword());
     }
 
     @Override

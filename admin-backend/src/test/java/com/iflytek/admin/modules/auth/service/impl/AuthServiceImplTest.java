@@ -14,6 +14,7 @@ import com.iflytek.admin.modules.system.mapper.SysLoginLogMapper;
 import com.iflytek.admin.modules.system.mapper.SysMenuMapper;
 import com.iflytek.admin.modules.system.mapper.SysUserMapper;
 import com.iflytek.admin.modules.system.mapper.SysUserRoleMapper;
+import com.iflytek.admin.modules.system.service.PasswordPolicyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,6 +49,7 @@ class AuthServiceImplTest {
     @Mock private RedisTemplate<String, Object> redisTemplate;
     @Mock private ValueOperations<String, Object> valueOperations;
     @Mock private CacheService cacheService;
+    @Mock private PasswordPolicyService passwordPolicyService;
 
     private SysUser testUser;
 
@@ -78,6 +80,7 @@ class AuthServiceImplTest {
             when(jwtUtil.generateRefreshToken(1L, "admin")).thenReturn("refresh-token");
             when(jwtUtil.getAccessTokenExpiration()).thenReturn(1800000L);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(passwordPolicyService.isExpired(any())).thenReturn(false);
 
             LoginResponse response = authService.login(request);
 

@@ -6,6 +6,7 @@ import com.iflytek.admin.modules.profile.dto.PasswordUpdateDTO;
 import com.iflytek.admin.modules.profile.dto.ProfileUpdateDTO;
 import com.iflytek.admin.modules.system.entity.SysUser;
 import com.iflytek.admin.modules.system.mapper.SysUserMapper;
+import com.iflytek.admin.modules.system.service.PasswordPolicyService;
 import com.iflytek.admin.security.CustomAccessDeniedHandler;
 import com.iflytek.admin.security.CustomUserDetailsService;
 import com.iflytek.admin.security.JwtAuthenticationEntryPoint;
@@ -26,6 +27,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -45,6 +48,7 @@ class ProfileControllerTest {
     @MockBean private JwtUtil jwtUtil;
     @MockBean private CustomUserDetailsService customUserDetailsService;
     @MockBean private RedisTemplate<String, Object> redisTemplate;
+    @MockBean private PasswordPolicyService passwordPolicyService;
 
     private UsernamePasswordAuthenticationToken createAuth(Long userId) {
         UserDetails userDetails = User.withUsername("admin")
@@ -141,6 +145,8 @@ class ProfileControllerTest {
             user.setPassword("$2a$encoded");
             when(userMapper.selectById(1L)).thenReturn(user);
             when(passwordEncoder.matches("oldpass123", "$2a$encoded")).thenReturn(true);
+            when(passwordPolicyService.validate("newpass123")).thenReturn(Collections.emptyList());
+            when(passwordPolicyService.isHistoryPassword(1L, "newpass123")).thenReturn(false);
             when(passwordEncoder.encode("newpass123")).thenReturn("$2a$new");
 
             PasswordUpdateDTO dto = new PasswordUpdateDTO();

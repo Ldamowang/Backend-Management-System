@@ -15,4 +15,6 @@ public class LoginResponse {
     @Builder.Default
     private String tokenType = "Bearer";
     private long expiresIn;
+    @Builder.Default
+    private boolean passwordExpired = false;
 }
