@@ -1,7 +1,9 @@
 package com.iflytek.admin.modules.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.iflytek.admin.common.constant.CacheConstants;
 import com.iflytek.admin.common.exception.BusinessException;
+import com.iflytek.admin.common.service.CacheService;
 import com.iflytek.admin.modules.system.dto.DictDataFormDTO;
 import com.iflytek.admin.modules.system.dto.DictTypeFormDTO;
 import com.iflytek.admin.modules.system.entity.SysDictData;
@@ -21,11 +23,16 @@ public class DictServiceImpl implements DictService {
 
     private final SysDictTypeMapper dictTypeMapper;
     private final SysDictDataMapper dictDataMapper;
+    private final CacheService cacheService;
 
     @Override
     public List<SysDictType> listTypes() {
-        return dictTypeMapper.selectList(new LambdaQueryWrapper<SysDictType>()
+        List<SysDictType> cached = cacheService.getAsList(CacheConstants.DICT_TYPES_KEY);
+        if (cached != null) return cached;
+        List<SysDictType> types = dictTypeMapper.selectList(new LambdaQueryWrapper<SysDictType>()
                 .orderByDesc(SysDictType::getCreatedTime));
+        cacheService.set(CacheConstants.DICT_TYPES_KEY, types, 86400);
+        return types;
     }
 
     @Override
@@ -47,6 +54,7 @@ public class DictServiceImpl implements DictService {
         type.setStatus(dto.getStatus());
         type.setDescription(dto.getDescription());
         dictTypeMapper.insert(type);
+        cacheService.delete(CacheConstants.DICT_TYPES_KEY);
     }
 
     @Override
@@ -67,7 +75,10 @@ public class DictServiceImpl implements DictService {
             update.setDictType(dto.getDictType());
             dictDataMapper.update(update, new LambdaQueryWrapper<SysDictData>()
                     .eq(SysDictData::getDictType, oldDictType));
+            cacheService.delete(CacheConstants.DICT_DATA_PREFIX + dto.getDictType());
         }
+        cacheService.delete(CacheConstants.DICT_TYPES_KEY);
+        cacheService.delete(CacheConstants.DICT_DATA_PREFIX + oldDictType);
     }
 
     @Override
@@ -79,13 +90,20 @@ public class DictServiceImpl implements DictService {
         dictTypeMapper.deleteById(id);
         dictDataMapper.delete(new LambdaQueryWrapper<SysDictData>()
                 .eq(SysDictData::getDictType, type.getDictType()));
+        cacheService.delete(CacheConstants.DICT_TYPES_KEY);
+        cacheService.delete(CacheConstants.DICT_DATA_PREFIX + type.getDictType());
     }
 
     @Override
     public List<SysDictData> listDataByType(String dictType) {
-        return dictDataMapper.selectList(new LambdaQueryWrapper<SysDictData>()
+        String key = CacheConstants.DICT_DATA_PREFIX + dictType;
+        List<SysDictData> cached = cacheService.getAsList(key);
+        if (cached != null) return cached;
+        List<SysDictData> data = dictDataMapper.selectList(new LambdaQueryWrapper<SysDictData>()
                 .eq(SysDictData::getDictType, dictType)
                 .orderByAsc(SysDictData::getSortOrder));
+        cacheService.set(key, data, 86400);
+        return data;
     }
 
     @Override
@@ -105,6 +123,7 @@ public class DictServiceImpl implements DictService {
         data.setStatus(dto.getStatus());
         data.setDescription(dto.getDescription());
         dictDataMapper.insert(data);
+        cacheService.delete(CacheConstants.DICT_DATA_PREFIX + dto.getDictType());
     }
 
     @Override
@@ -118,10 +137,15 @@ public class DictServiceImpl implements DictService {
         if (dto.getStatus() != null) data.setStatus(dto.getStatus());
         if (dto.getDescription() != null) data.setDescription(dto.getDescription());
         dictDataMapper.updateById(data);
+        cacheService.delete(CacheConstants.DICT_DATA_PREFIX + data.getDictType());
     }
 
     @Override
     public void deleteData(Long id) {
+        SysDictData data = dictDataMapper.selectById(id);
         dictDataMapper.deleteById(id);
+        if (data != null) {
+            cacheService.delete(CacheConstants.DICT_DATA_PREFIX + data.getDictType());
+        }
     }
 }
