@@ -3,7 +3,7 @@ package com.iflytek.admin.modules.system.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iflytek.admin.common.utils.JwtUtil;
 import com.iflytek.admin.modules.system.entity.SysConfig;
-import com.iflytek.admin.modules.system.mapper.SysConfigMapper;
+import com.iflytek.admin.modules.system.service.ConfigService;
 import com.iflytek.admin.security.CustomAccessDeniedHandler;
 import com.iflytek.admin.security.CustomUserDetailsService;
 import com.iflytek.admin.security.JwtAuthenticationEntryPoint;
@@ -36,7 +36,7 @@ class ConfigControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private SysConfigMapper configMapper;
+    @MockBean private ConfigService configService;
     @MockBean private JwtUtil jwtUtil;
     @MockBean private CustomUserDetailsService customUserDetailsService;
     @MockBean private RedisTemplate<String, Object> redisTemplate;
@@ -53,7 +53,7 @@ class ConfigControllerTest {
             config.setId(1L);
             config.setConfigKey("site.name");
             config.setConfigValue("Admin System");
-            when(configMapper.selectList(any())).thenReturn(List.of(config));
+            when(configService.listAll()).thenReturn(List.of(config));
 
             mockMvc.perform(get("/api/configs"))
                     .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class ConfigControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value(200));
 
-            verify(configMapper).updateById(any(SysConfig.class));
+            verify(configService).batchUpdate(anyList());
         }
 
         @Test

@@ -3,7 +3,7 @@ package com.iflytek.admin.modules.system.controller;
 import com.iflytek.admin.common.annotation.Log;
 import com.iflytek.admin.common.result.Result;
 import com.iflytek.admin.modules.system.entity.SysConfig;
-import com.iflytek.admin.modules.system.mapper.SysConfigMapper;
+import com.iflytek.admin.modules.system.service.ConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,13 +19,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ConfigController {
 
-    private final SysConfigMapper configMapper;
+    private final ConfigService configService;
 
     @Operation(summary = "配置列表")
     @PreAuthorize("hasAuthority('sys:config:list')")
     @GetMapping
     public Result<List<SysConfig>> list() {
-        return Result.ok(configMapper.selectList(null));
+        return Result.ok(configService.listAll());
     }
 
     @Operation(summary = "批量更新配置")
@@ -33,7 +33,7 @@ public class ConfigController {
     @Log(module = "系统配置", operation = "更新")
     @PutMapping
     public Result<Void> update(@Valid @RequestBody List<SysConfig> configs) {
-        configs.forEach(configMapper::updateById);
+        configService.batchUpdate(configs);
         return Result.ok();
     }
 }
