@@ -1,6 +1,7 @@
 import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import { getToken, setToken, setRefreshToken, clearAuth, getRefreshToken } from '@/utils/auth'
+import { useIdempotent } from '@/composables/useIdempotent'
 import router from '@/router'
 
 const service = axios.create({
@@ -20,6 +21,17 @@ service.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // 幂等性 Token：POST 请求自动注入
+    if (config.method?.toLowerCase() === 'post') {
+      const { getToken: getIdempotentToken, clearToken } = useIdempotent()
+      const idempotentToken = getIdempotentToken()
+      if (idempotentToken) {
+        config.headers['X-Idempotent-Token'] = idempotentToken
+        clearToken()
+      }
+    }
+
     return config
   },
   (error) => Promise.reject(error)
