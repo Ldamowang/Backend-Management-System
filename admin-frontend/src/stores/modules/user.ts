@@ -18,6 +18,7 @@ export const useUserStore = defineStore('user', () => {
     token.value = data.accessToken
     setToken(data.accessToken)
     setRefreshToken(data.refreshToken)
+    return { passwordExpired: data.passwordExpired ?? false }
   }
 
   async function fetchUserInfo() {

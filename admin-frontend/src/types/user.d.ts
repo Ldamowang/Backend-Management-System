@@ -46,6 +46,7 @@ export interface LoginResult {
   refreshToken: string
   tokenType: string
   expiresIn: number
+  passwordExpired?: boolean
 }
 
 export interface UserInfoResult {

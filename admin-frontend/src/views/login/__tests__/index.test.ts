@@ -59,6 +59,13 @@ vi.mock('@/utils/auth', () => ({
   clearAuth: vi.fn()
 }))
 
+// mock profile API
+vi.mock('@/api/modules/profile', () => ({
+  updatePassword: vi.fn()
+}))
+
+const dialogStub = { template: '<div v-if="modelValue"><slot /><slot name="footer" /></div>', props: ['modelValue'] }
+
 describe('Login 登录页', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -74,7 +81,8 @@ describe('Login 登录页', () => {
           'el-form-item': { template: '<div><slot /></div>' },
           'el-input': { template: '<input />', props: ['modelValue', 'placeholder'] },
           'el-checkbox': { template: '<label><slot /></label>' },
-          'el-button': { template: '<button><slot /></button>' }
+          'el-button': { template: '<button><slot /></button>' },
+          'el-dialog': dialogStub
         }
       }
     })
@@ -93,7 +101,8 @@ describe('Login 登录页', () => {
           'el-form-item': { template: '<div class="form-item"><slot /></div>' },
           'el-input': { template: '<input class="el-input" />', props: ['modelValue', 'placeholder', 'type'] },
           'el-checkbox': { template: '<label><slot /></label>' },
-          'el-button': { template: '<button><slot /></button>' }
+          'el-button': { template: '<button><slot /></button>' },
+          'el-dialog': dialogStub
         }
       }
     })
@@ -111,7 +120,8 @@ describe('Login 登录页', () => {
           'el-form-item': { template: '<div><slot /></div>' },
           'el-input': { template: '<input />' },
           'el-checkbox': { template: '<label class="remember"><slot /></label>' },
-          'el-button': { template: '<button><slot /></button>' }
+          'el-button': { template: '<button><slot /></button>' },
+          'el-dialog': dialogStub
         }
       }
     })
@@ -128,7 +138,8 @@ describe('Login 登录页', () => {
           'el-form-item': { template: '<div><slot /></div>' },
           'el-input': { template: '<input />' },
           'el-checkbox': { template: '<label><slot /></label>' },
-          'el-button': { template: '<button class="login-btn"><slot /></button>' }
+          'el-button': { template: '<button class="login-btn"><slot /></button>' },
+          'el-dialog': dialogStub
         }
       }
     })
@@ -137,7 +148,7 @@ describe('Login 登录页', () => {
   })
 
   it('登录成功后跳转首页', async () => {
-    mockLogin.mockResolvedValueOnce(undefined)
+    mockLogin.mockResolvedValueOnce({ passwordExpired: false })
 
     const wrapper = mount(LoginPage, {
       global: {
@@ -153,7 +164,8 @@ describe('Login 登录页', () => {
           'el-button': {
             template: '<button @click="$emit(\'click\')"><slot /></button>',
             emits: ['click']
-          }
+          },
+          'el-dialog': dialogStub
         }
       }
     })
