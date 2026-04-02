@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
   status TINYINT DEFAULT 1,
   last_login_time DATETIME DEFAULT NULL,
   last_login_ip VARCHAR(50) DEFAULT NULL,
+  password_changed_time DATETIME DEFAULT NULL,
   created_by VARCHAR(50) DEFAULT NULL,
   created_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_by VARCHAR(50) DEFAULT NULL,
@@ -115,4 +116,12 @@ CREATE TABLE IF NOT EXISTS sys_config (
   updated_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT uk_config_key UNIQUE (config_key)
+);
+
+CREATE TABLE IF NOT EXISTS sys_password_history (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  password VARCHAR(200) NOT NULL,
+  created_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
 );

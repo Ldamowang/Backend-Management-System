@@ -21,4 +21,5 @@ public class SysUser extends BaseEntity {
     private Integer status;
     private LocalDateTime lastLoginTime;
     private String lastLoginIp;
+    private LocalDateTime passwordChangedTime;
 }
