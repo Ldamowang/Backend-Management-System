@@ -22,8 +22,9 @@ service.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
-    // 幂等性 Token：POST 请求自动注入
-    if (config.method?.toLowerCase() === 'post') {
+    // 幂等性 Token：POST/PUT/DELETE 请求自动注入
+    const methodsNeedIdempotent = ['post', 'put', 'delete']
+    if (config.method && methodsNeedIdempotent.includes(config.method.toLowerCase())) {
       const { getToken: getIdempotentToken, clearToken } = useIdempotent()
       const idempotentToken = getIdempotentToken()
       if (idempotentToken) {
@@ -93,6 +94,13 @@ service.interceptors.response.use(
       } finally {
         isRefreshing = false
       }
+    }
+
+    // 409: 重复提交
+    if (response?.status === 409 || response?.data?.code === 409) {
+      const dupMsg = response?.data?.message || '该操作已提交，请勿重复操作'
+      ElMessage.warning(dupMsg)
+      return Promise.reject(new Error(dupMsg))
     }
 
     const msg = response?.data?.message || error.message || '网络错误'
