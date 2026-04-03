@@ -12,7 +12,7 @@
       <el-tooltip content="Ctrl+K" placement="bottom">
         <el-icon class="action-icon" @click="searchDialog?.search.open()"><Search /></el-icon>
       </el-tooltip>
-      <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="header-icon-btn">
+      <el-badge :value="noticeStore.unreadCount" :hidden="noticeStore.unreadCount === 0" :max="99" class="header-icon-btn">
         <el-icon class="action-icon" @click="router.push('/profile')"><Bell /></el-icon>
       </el-badge>
       <el-dropdown @command="handleLocaleChange" class="locale-switcher">
@@ -63,7 +63,7 @@ import { ElMessageBox } from 'element-plus'
 import { User } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/modules/app'
 import { useUserStore } from '@/stores/modules/user'
-import { getUnreadCount } from '@/api/modules/notice'
+import { useNoticeStore } from '@/stores/modules/notice'
 import { loadLanguage, availableLocales } from '@/locales'
 import Breadcrumb from './Breadcrumb.vue'
 import SettingsDrawer from './SettingsDrawer.vue'
@@ -72,9 +72,9 @@ import SearchDialog from '@/components/SearchDialog/index.vue'
 const router = useRouter()
 const appStore = useAppStore()
 const userStore = useUserStore()
+const noticeStore = useNoticeStore()
 const { t, locale } = useI18n()
 const settingsVisible = ref(false)
-const unreadCount = ref(0)
 const searchDialog = ref<InstanceType<typeof SearchDialog>>()
 
 const currentLocaleName = computed(() => {
@@ -83,13 +83,6 @@ const currentLocaleName = computed(() => {
 
 async function handleLocaleChange(code: string) {
   await loadLanguage(code)
-}
-
-async function fetchUnreadCount() {
-  try {
-    const { data } = await getUnreadCount()
-    unreadCount.value = data
-  } catch { /* ignore */ }
 }
 
 async function handleCommand(command: string) {
@@ -111,7 +104,7 @@ async function handleCommand(command: string) {
 }
 
 onMounted(() => {
-  if (userStore.token) fetchUnreadCount()
+  if (userStore.token) noticeStore.fetchUnreadCount()
   searchDialog.value?.search?.setupShortcut()
 })
 </script>

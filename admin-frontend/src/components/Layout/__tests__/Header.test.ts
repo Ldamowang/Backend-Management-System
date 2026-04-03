@@ -39,7 +39,19 @@ vi.mock('@/api/modules/auth', () => ({
 }))
 
 vi.mock('@/api/modules/notice', () => ({
-  getUnreadCount: vi.fn().mockResolvedValue({ data: 0 })
+  getUnreadCount: vi.fn().mockResolvedValue({ data: 0 }),
+  markNoticeRead: vi.fn().mockResolvedValue({ data: null }),
+  markAllNoticesRead: vi.fn().mockResolvedValue({ data: null })
+}))
+
+vi.mock('@/composables/useWebSocket', () => ({
+  useWebSocket: vi.fn(() => ({
+    connect: vi.fn(),
+    subscribe: vi.fn(),
+    disconnect: vi.fn(),
+    connected: { value: false },
+    client: { value: null }
+  }))
 }))
 
 vi.mock('@/api/modules/user', () => ({
