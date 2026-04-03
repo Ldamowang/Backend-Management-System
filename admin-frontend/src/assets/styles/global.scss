@@ -1,4 +1,5 @@
 @use './dark.scss';
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 * {
   margin: 0;
@@ -9,7 +10,16 @@
 html, body, #app {
   width: 100%;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: $font-family-body;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-heading;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -17,15 +27,42 @@ a {
   color: inherit;
 }
 
-// 滚动条样式
+// ==================== Element Plus 覆盖 ====================
+
+:root {
+  --el-color-primary: #{$primary-color};
+  --el-color-primary-light-3: #818CF8;
+  --el-color-primary-light-5: #A5B4FC;
+  --el-color-primary-light-7: #C7D2FE;
+  --el-color-primary-light-9: #EEF2FF;
+  --el-color-primary-dark-2: #4F46E5;
+  --el-color-success: #{$success-color};
+  --el-color-warning: #{$warning-color};
+  --el-color-danger: #{$danger-color};
+  --el-color-info: #{$info-color};
+  --el-border-radius-base: #{$border-radius-base};
+  --el-font-family: #{$font-family-body};
+  --el-text-color-primary: #{$text-primary};
+  --el-text-color-regular: #{$text-regular};
+  --el-text-color-secondary: #{$text-secondary};
+  --el-border-color: #{$border-color};
+  --el-border-color-light: #{$border-light};
+  --el-fill-color-light: #{$border-lighter};
+  --el-bg-color: #fff;
+  --el-bg-color-page: #{$content-bg};
+}
+
+// ==================== 滚动条 ====================
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c0c4cc;
+  background: #CBD5E1;
   border-radius: 3px;
+  &:hover { background: #94A3B8; }
 }
 
 ::-webkit-scrollbar-track {
@@ -56,17 +93,14 @@ a {
 
 // ==================== 页面通用样式 ====================
 
-// 搜索卡片与数据卡片间距
 .card-gap {
   margin-top: $spacing-lg;
 }
 
-// 表格全宽
 .table-full {
   width: 100%;
 }
 
-// 分页器样式
 .pagination-right {
   margin-top: $spacing-lg;
   justify-content: flex-end;
@@ -129,10 +163,90 @@ a {
   margin-left: $spacing-sm;
 }
 
+// ==================== 动画关键帧 ====================
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ==================== 动画工具类 ====================
+
+.animate-fade-in-up {
+  animation: fadeInUp $transition-slow both;
+}
+
+.animate-fade-in {
+  animation: fadeIn $transition-base both;
+}
+
+// 交错入场动画
+@for $i from 1 through 12 {
+  .stagger-#{$i} {
+    animation-delay: #{$i * 0.06}s;
+  }
+}
+
 // ==================== 暗黑模式适配 ====================
 
 html.dark {
   ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb, #4c4d4f);
   }
+}
+
+// ==================== El-Card 全局美化 ====================
+
+.el-card {
+  --el-card-border-radius: #{$border-radius-lg};
+  border: 1px solid $border-light;
+  transition: box-shadow $transition-base, transform $transition-base;
 }

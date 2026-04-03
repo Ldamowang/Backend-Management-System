@@ -10,13 +10,19 @@
 
     <div class="header-right">
       <el-tooltip content="Ctrl+K" placement="bottom">
-        <el-icon class="action-icon" @click="searchDialog?.search.open()"><Search /></el-icon>
+        <button class="action-btn" @click="searchDialog?.search.open()">
+          <el-icon><Search /></el-icon>
+        </button>
       </el-tooltip>
+
       <el-badge :value="noticeStore.unreadCount" :hidden="noticeStore.unreadCount === 0" :max="99" class="header-icon-btn">
-        <el-icon class="action-icon" @click="router.push('/profile')"><Bell /></el-icon>
+        <button class="action-btn" @click="router.push('/profile')">
+          <el-icon><Bell /></el-icon>
+        </button>
       </el-badge>
+
       <el-dropdown @command="handleLocaleChange" class="locale-switcher">
-        <span class="action-icon locale-text">{{ currentLocaleName }}</span>
+        <button class="action-btn locale-text">{{ currentLocaleName }}</button>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item
@@ -30,10 +36,16 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <el-icon class="action-icon" @click="settingsVisible = true"><Setting /></el-icon>
+
+      <button class="action-btn" @click="settingsVisible = true">
+        <el-icon><Setting /></el-icon>
+      </button>
+
       <el-dropdown @command="handleCommand">
         <div class="user-info">
-          <el-avatar :size="32" :icon="User" />
+          <div class="user-avatar">
+            {{ (userStore.userInfo?.nickname || 'A').charAt(0).toUpperCase() }}
+          </div>
           <span class="username">{{ userStore.userInfo?.nickname || $t('system.user.username') }}</span>
           <el-icon class="arrow-down"><ArrowDown /></el-icon>
         </div>
@@ -115,7 +127,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
 .header-left {
@@ -127,14 +139,21 @@ onMounted(() => {
 .collapse-btn {
   cursor: pointer;
   font-size: 20px;
-  color: #606266;
-  &:hover { color: $primary-color; }
+  color: $text-secondary;
+  padding: 6px;
+  border-radius: $border-radius-sm;
+  transition: all $transition-base;
+
+  &:hover {
+    color: $primary-color;
+    background: rgba(99, 102, 241, 0.06);
+  }
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .header-icon-btn {
@@ -142,41 +161,70 @@ onMounted(() => {
   align-items: center;
 }
 
-.action-icon {
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
   font-size: 18px;
   cursor: pointer;
-  color: #606266;
-  padding: 6px;
-  border-radius: 4px;
-  &:hover { background-color: #f5f7fa; color: var(--el-color-primary); }
+  color: $text-secondary;
+  border-radius: $border-radius-sm;
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.06);
+    color: $primary-color;
+  }
 }
 
 .locale-text {
-  font-size: 13px;
-  cursor: pointer;
-  color: #606266;
-  padding: 6px 8px;
-  border-radius: 4px;
-  &:hover { background-color: #f5f7fa; color: var(--el-color-primary); }
+  width: auto;
+  padding: 0 10px;
+  font-size: $font-size-sm;
+  font-family: $font-family-body;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 4px;
-  &:hover { background-color: #f5f7fa; }
+  padding: 6px 12px;
+  border-radius: $border-radius-base;
+  margin-left: 4px;
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.06);
+  }
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: $border-radius-sm;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: 600;
 }
 
 .username {
-  font-size: 14px;
-  color: #606266;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $text-primary;
 }
 
 .arrow-down {
   font-size: 12px;
-  color: #909399;
+  color: $text-secondary;
 }
 </style>

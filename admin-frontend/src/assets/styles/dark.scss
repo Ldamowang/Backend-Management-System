@@ -2,26 +2,41 @@
 @use 'element-plus/theme-chalk/dark/css-vars.css';
 
 html.dark {
+  // 主题色
+  --el-color-primary: #818CF8;
+  --el-color-primary-light-3: #6366F1;
+  --el-color-primary-light-5: #4F46E5;
+  --el-color-primary-light-7: #3730A3;
+  --el-color-primary-light-9: #1E1B4B;
+  --el-color-primary-dark-2: #A5B4FC;
+
   // 侧边栏
-  --sidebar-bg: #1d1e1f;
-  --sidebar-header-bg: #141414;
+  --sidebar-bg: #0B0F1A;
+  --sidebar-header-bg: #060911;
+  --sidebar-text: #94A3B8;
+  --sidebar-active: #818CF8;
 
   // 头部
-  --header-bg: #1d1e1f;
-  --header-border: #363637;
+  --header-bg: rgba(15, 23, 42, 0.85);
+  --header-border: #1E293B;
 
   // 内容区
-  --content-bg: #141414;
+  --content-bg: #0F172A;
 
   // 文本
-  --text-primary: #e5eaf3;
-  --text-regular: #cfd3dc;
-  --text-secondary: #a3a6ad;
+  --text-primary: #F1F5F9;
+  --text-regular: #CBD5E1;
+  --text-secondary: #94A3B8;
 
   // 边框
-  --border-color: #363637;
-  --border-light: #414243;
+  --border-color: #1E293B;
+  --border-light: #334155;
 
   // 滚动条
-  --scrollbar-thumb: #4c4d4f;
+  --scrollbar-thumb: #334155;
+
+  // 卡片
+  --el-bg-color: #1E293B;
+  --el-bg-color-overlay: #1E293B;
+  --el-fill-color-light: #334155;
 }
