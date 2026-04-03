@@ -6,7 +6,7 @@
       </el-button>
       <template v-else>
         <el-button type="success" size="small" @click="store.toggleEditMode()">完成编辑</el-button>
-        <el-button size="small" @click="showAddDialog = true">+ 添加卡片</el-button>
+        <el-button size="small" @click="drawerVisible = true">卡片市场</el-button>
         <el-button size="small" type="warning" @click="store.resetLayout()">恢复默认</el-button>
       </template>
     </div>
@@ -30,12 +30,13 @@
             :widget-id="widgetId"
             :edit-mode="store.editMode"
             @remove="store.removeWidget(widgetId)"
+            @edit="openEditWizard(widgetId)"
           />
         </div>
       </template>
     </draggable>
 
-    <AddWidgetDialog v-model="showAddDialog" />
+    <WidgetMarketDrawer v-model="drawerVisible" />
   </div>
 </template>
 
@@ -43,68 +44,41 @@
 import { ref } from 'vue'
 import draggable from 'vuedraggable'
 import { useDashboardStore } from '@/stores/modules/dashboard'
-import { getWidgetMeta } from './widgets/registry'
+import { resolveWidgetMeta } from './widgets/registry'
 import WidgetWrapper from './WidgetWrapper.vue'
-import AddWidgetDialog from './AddWidgetDialog.vue'
+import WidgetMarketDrawer from './WidgetMarketDrawer.vue'
 
 const store = useDashboardStore()
-const showAddDialog = ref(false)
+const drawerVisible = ref(false)
 
 function spanClass(widgetId: string): string {
-  const span = getWidgetMeta(widgetId)?.defaultSpan ?? 12
+  const meta = resolveWidgetMeta(widgetId, store.customWidgets)
+  const span = meta?.defaultSpan ?? 12
   return `span-${span}`
 }
 
 function onDragEnd() {
   store.reorderWidgets([...store.activeWidgets])
 }
+
+function openEditWizard(widgetId: string) {
+  drawerVisible.value = true
+}
 </script>
 
 <style scoped lang="scss">
-.grid-toolbar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.edit-btn {
-  border-radius: $border-radius-sm;
-}
-
-// ===== Flex-wrap 栅格布局 =====
-.dashboard-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
+.grid-toolbar { display: flex; gap: 8px; margin-bottom: 20px; }
+.edit-btn { border-radius: $border-radius-sm; }
+.dashboard-grid { display: flex; flex-wrap: wrap; gap: 20px; }
 .grid-item {
   min-height: 0;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
-  // 栅格宽度（基于 24 列 + 20px gap）
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   &.span-6  { width: calc(25% - 15px); }
   &.span-8  { width: calc(33.333% - 13.333px); }
   &.span-12 { width: calc(50% - 10px); }
   &.span-16 { width: calc(66.666% - 6.666px); }
   &.span-24 { width: 100%; }
 }
-
-// ===== 拖拽动画 =====
-.widget-ghost {
-  opacity: 0.4;
-  border-radius: $border-radius-lg;
-
-  :deep(.el-card) {
-    border: 2px dashed $primary-color;
-    background: rgba(99, 102, 241, 0.04);
-  }
-}
-
-.widget-drag {
-  transform: rotate(1.5deg) scale(1.02);
-  box-shadow: $box-shadow-hover;
-  z-index: 100;
-}
+.widget-ghost { opacity: 0.4; border-radius: $border-radius-lg; :deep(.el-card) { border: 2px dashed $primary-color; background: rgba(99, 102, 241, 0.04); } }
+.widget-drag { transform: rotate(1.5deg) scale(1.02); box-shadow: $box-shadow-hover; z-index: 100; }
 </style>
