@@ -164,7 +164,18 @@
     "browser": "Browser",
     "os": "OS",
     "logMessage": "Message",
-    "loginTime": "Login Time"
+    "loginTime": "Login Time",
+    "targetType": "Target Type",
+    "targetId": "Target ID",
+    "viewChanges": "View Changes",
+    "changeDetail": "Change Detail",
+    "beforeData": "Before",
+    "afterData": "After",
+    "noChangeData": "No change data",
+    "modulePlaceholder": "Select module",
+    "statusPlaceholder": "Select status",
+    "dateRange": "Date Range",
+    "dateRangePlaceholder": "Select date range"
   },
   "online": {
     "title": "Online Users",

@@ -16,6 +16,10 @@ export interface OperationLog {
   duration: number
   status: number
   errorMsg: string
+  targetType?: string
+  targetId?: number
+  beforeData?: string
+  afterData?: string
   createdTime: string
 }
 
@@ -31,7 +35,14 @@ export interface LoginLog {
   loginTime: string
 }
 
-export function getOperationLogs(params: PageQuery): Promise<PageResponse<OperationLog>> {
+export interface OperationLogQuery extends PageQuery {
+  module?: string
+  status?: number
+  startDate?: string
+  endDate?: string
+}
+
+export function getOperationLogs(params: OperationLogQuery): Promise<PageResponse<OperationLog>> {
   return request.get('/logs/operation', { params })
 }
 

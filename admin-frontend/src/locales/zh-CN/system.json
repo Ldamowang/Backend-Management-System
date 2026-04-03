@@ -164,7 +164,18 @@
     "browser": "浏览器",
     "os": "操作系统",
     "logMessage": "消息",
-    "loginTime": "登录时间"
+    "loginTime": "登录时间",
+    "targetType": "目标类型",
+    "targetId": "目标ID",
+    "viewChanges": "查看变更",
+    "changeDetail": "变更详情",
+    "beforeData": "变更前",
+    "afterData": "变更后",
+    "noChangeData": "无变更数据",
+    "modulePlaceholder": "请选择模块",
+    "statusPlaceholder": "请选择状态",
+    "dateRange": "操作时间范围",
+    "dateRangePlaceholder": "请选择日期范围"
   },
   "online": {
     "title": "在线用户",
