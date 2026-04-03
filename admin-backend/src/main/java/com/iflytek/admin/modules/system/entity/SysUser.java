@@ -2,6 +2,8 @@ package com.iflytek.admin.modules.system.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.iflytek.admin.base.BaseEntity;
+import com.iflytek.admin.common.annotation.Sensitive;
+import com.iflytek.admin.common.enums.SensitiveType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
@@ -14,7 +16,10 @@ public class SysUser extends BaseEntity {
     private String password;
     private String nickname;
     private Long deptId;
+    @Sensitive(SensitiveType.EMAIL)
     private String email;
+
+    @Sensitive(SensitiveType.PHONE)
     private String phone;
     private String avatar;
     private Integer gender;
