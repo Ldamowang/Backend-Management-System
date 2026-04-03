@@ -15,6 +15,12 @@ public final class CacheConstants {
     public static final String PERM_USER_PREFIX = "perm:user:";
     public static final String IDEMPOTENT_PREFIX = "idempotent:";
 
+    /** 用户会话集合 (Sorted Set): user:sessions:{userId} */
+    public static final String USER_SESSIONS_PREFIX = "user:sessions:";
+
+    /** 默认最大会话数 */
+    public static final int DEFAULT_MAX_SESSIONS = 1;
+
     /** 字典缓存 TTL：24 小时（秒） */
     public static final long DICT_TTL = 86400;
     /** 系统配置缓存 TTL：24 小时（秒） */
