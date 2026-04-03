@@ -3,6 +3,7 @@ package com.iflytek.admin.common.exception;
 import com.iflytek.admin.common.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -18,9 +19,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public Result<Void> handleBusinessException(BusinessException e) {
+    public ResponseEntity<Result<Void>> handleBusinessException(BusinessException e) {
         log.warn("Business exception: {}", e.getMessage());
-        return Result.fail(e.getCode(), e.getMessage());
+        int code = e.getCode();
+        Result<Void> result = Result.fail(code, e.getMessage());
+        if (code == 409) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

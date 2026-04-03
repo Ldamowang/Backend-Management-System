@@ -16,7 +16,7 @@ public enum ResultCode {
     TOKEN_EXPIRED(40004, "Token已过期"),
     TOKEN_INVALID(40005, "Token无效"),
     RATE_LIMIT_EXCEEDED(429, "请求过于频繁，请稍后再试"),
-    DUPLICATE_SUBMIT(40006, "请勿重复提交");
+    DUPLICATE_SUBMIT(409, "该操作已提交，请勿重复操作");
 
     private final int code;
     private final String message;
