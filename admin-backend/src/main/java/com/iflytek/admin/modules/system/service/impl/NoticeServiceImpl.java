@@ -13,6 +13,7 @@ import com.iflytek.admin.modules.system.mapper.SysUserMapper;
 import com.iflytek.admin.modules.system.mapper.SysUserNoticeMapper;
 import com.iflytek.admin.modules.system.service.NoticeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class NoticeServiceImpl implements NoticeService {
     private final SysNoticeMapper noticeMapper;
     private final SysUserNoticeMapper userNoticeMapper;
     private final SysUserMapper userMapper;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public PageResult<SysNotice> page(int page, int size) {
@@ -92,6 +94,26 @@ public class NoticeServiceImpl implements NoticeService {
                 un.setNoticeId(id);
                 un.setIsRead(0);
                 userNoticeMapper.insert(un);
+            }
+        }
+
+        // WebSocket 推送
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", notice.getId());
+        payload.put("title", notice.getTitle());
+        payload.put("noticeType", notice.getNoticeType());
+        payload.put("createdTime", notice.getCreatedTime());
+
+        if (notice.getNoticeType() == 2) {
+            // 公告：广播给所有人
+            messagingTemplate.convertAndSend("/topic/notice/broadcast", payload);
+        } else {
+            // 通知：逐用户推送
+            for (SysUser user : users) {
+                messagingTemplate.convertAndSendToUser(
+                        user.getId().toString(),
+                        "/queue/notice",
+                        payload);
             }
         }
     }

@@ -5,6 +5,7 @@ import { getToken, setToken, setRefreshToken, clearAuth } from '@/utils/auth'
 import type { LoginForm, UserInfo } from '@/types/user'
 import type { MenuItem } from '@/types/menu'
 import { useDictStore } from './dict'
+import { useNoticeStore } from './notice'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(getToken())
@@ -27,6 +28,11 @@ export const useUserStore = defineStore('user', () => {
     roles.value = data.roles
     permissions.value = data.permissions
     menus.value = data.menus
+
+    const noticeStore = useNoticeStore()
+    noticeStore.fetchUnreadCount()
+    noticeStore.initWebSocket(data.user.id)
+
     return data
   }
 
@@ -46,6 +52,7 @@ export const useUserStore = defineStore('user', () => {
     menus.value = []
     clearAuth()
     useDictStore().clearAll()
+    useNoticeStore().cleanup()
   }
 
   function updateLocalProfile(patch: Partial<UserInfo>) {
