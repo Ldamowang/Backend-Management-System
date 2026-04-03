@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { ElMessageBox } from 'element-plus'
 import { login as loginApi, logout as logoutApi, getUserInfo as getUserInfoApi } from '@/api/modules/auth'
 import { getToken, setToken, setRefreshToken, clearAuth } from '@/utils/auth'
 import type { LoginForm, UserInfo } from '@/types/user'
 import type { MenuItem } from '@/types/menu'
 import { useDictStore } from './dict'
 import { useNoticeStore } from './notice'
+import { useWebSocket } from '@/composables/useWebSocket'
+import router from '@/router'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(getToken())
@@ -32,6 +35,33 @@ export const useUserStore = defineStore('user', () => {
     const noticeStore = useNoticeStore()
     noticeStore.fetchUnreadCount()
     noticeStore.initWebSocket(data.user.id)
+
+    // Subscribe to kick-out notification (concurrent login control)
+    const { subscribe, connected } = useWebSocket()
+    const subscribeKick = () => {
+      if (connected.value) {
+        subscribe('/user/queue/kick', (msg) => {
+          const payload = msg as { message?: string }
+          ElMessageBox.alert(
+            payload.message || '您的账号在其他设备登录，当前会话已被强制下线',
+            '下线通知',
+            {
+              confirmButtonText: '重新登录',
+              type: 'warning',
+              showClose: false,
+              closeOnClickModal: false,
+              callback: () => {
+                resetState()
+                router.push('/login')
+              }
+            }
+          )
+        })
+      } else {
+        setTimeout(subscribeKick, 500)
+      }
+    }
+    subscribeKick()
 
     return data
   }
