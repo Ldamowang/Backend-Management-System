@@ -1,3 +1,5 @@
+import type { CustomWidget } from '@/types/widget'
+
 export interface WidgetMeta {
   id: string
   name: string
@@ -73,4 +75,33 @@ export const DEFAULT_LAYOUT = [
 
 export function getWidgetMeta(id: string): WidgetMeta | undefined {
   return widgetRegistry.find(w => w.id === id)
+}
+
+const customWidgetComponents: Record<string, () => Promise<any>> = {
+  chart: () => import('./CustomChart.vue'),
+  stat: () => import('./CustomStat.vue'),
+  note: () => import('./CustomNote.vue'),
+  link: () => import('./CustomLink.vue')
+}
+
+export function getCustomWidgetComponent(type: string): (() => Promise<any>) | undefined {
+  return customWidgetComponents[type]
+}
+
+export function resolveWidgetMeta(widgetId: string, customWidgets: CustomWidget[]): WidgetMeta | undefined {
+  // 先查预置
+  const preset = getWidgetMeta(widgetId)
+  if (preset) return preset
+  // 再查自定义
+  const custom = customWidgets.find(w => w.id === widgetId)
+  if (!custom) return undefined
+  const comp = getCustomWidgetComponent(custom.type)
+  if (!comp) return undefined
+  return {
+    id: custom.id,
+    name: custom.name,
+    type: custom.type === 'note' || custom.type === 'link' ? 'shortcut' : custom.type,
+    component: comp,
+    defaultSpan: custom.span
+  }
 }
