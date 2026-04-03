@@ -39,7 +39,7 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
 
     @Override
     public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
-        if (property == null) return this;
+        if (property == null) return prov.findNullValueSerializer(null);
         Sensitive annotation = property.getAnnotation(Sensitive.class);
         if (annotation == null) annotation = property.getContextAnnotation(Sensitive.class);
         if (annotation != null) return new SensitiveSerializer(annotation.value());
@@ -51,6 +51,6 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
         if (auth == null) return false;
         return auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.equals("admin") || a.equals("ROLE_admin"));
+                .anyMatch(a -> a.equals("ROLE_admin"));
     }
 }

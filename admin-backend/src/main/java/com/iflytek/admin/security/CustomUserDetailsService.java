@@ -36,6 +36,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
+        // Also load roles and add them as ROLE_ prefixed authorities
+        List<String> roles = userMapper.selectUserRoles(user.getId());
+        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+
         return new User(user.getUsername(), user.getPassword(), authorities);
     }
 }

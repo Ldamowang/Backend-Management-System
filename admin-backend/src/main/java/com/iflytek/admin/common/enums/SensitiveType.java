@@ -10,7 +10,7 @@ public enum SensitiveType {
     EMAIL(val -> {
         if (val == null || !val.contains("@")) return val;
         int atIdx = val.indexOf('@');
-        if (atIdx <= 1) return val;
+        if (atIdx < 1) return val;
         return val.charAt(0) + "***" + val.substring(atIdx);
     }),
     ID_CARD(val -> {
