@@ -11,17 +11,20 @@ import com.iflytek.admin.modules.auth.dto.LoginResponse;
 import com.iflytek.admin.modules.auth.service.AuthService;
 import com.iflytek.admin.modules.system.entity.*;
 import com.iflytek.admin.modules.system.mapper.*;
+import com.iflytek.admin.modules.system.service.OnlineUserService;
 import com.iflytek.admin.modules.system.service.PasswordPolicyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -35,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final CacheService cacheService;
     private final PasswordPolicyService passwordPolicyService;
+    private final OnlineUserService onlineUserService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -60,21 +65,35 @@ public class AuthServiceImpl implements AuthService {
 
         saveLoginLog(request.getUsername(), 1, "登录成功");
 
+        // 并发登录控制
+        int maxSessions = getConfigInt("login.max-sessions", CacheConstants.DEFAULT_MAX_SESSIONS);
+        String conflictPolicy = getConfigString("login.conflict-policy", "kick_old");
+
+        long currentSessions = onlineUserService.getSessionCount(user.getId());
+        if (currentSessions >= maxSessions) {
+            if ("reject_new".equals(conflictPolicy)) {
+                saveLoginLog(request.getUsername(), 0, "并发会话数超限，拒绝登录");
+                throw new BusinessException(40007, "当前账号已在其他设备登录，不允许重复登录");
+            }
+            // kick_old: 踢掉最旧的会话直到低于限制
+            while (onlineUserService.getSessionCount(user.getId()) >= maxSessions) {
+                String kickedToken = onlineUserService.kickOldestSession(user.getId());
+                if (kickedToken == null) break;
+                // 通过 WebSocket 通知被踢用户
+                notifyKickedUser(user.getId(), kickedToken);
+            }
+        }
+
         String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername());
         String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getUsername());
 
-        // 记录在线用户
+        // 记录在线用户（使用 Sorted Set 管理会话）
         Map<String, Object> onlineInfo = new HashMap<>();
         onlineInfo.put("userId", user.getId());
         onlineInfo.put("username", user.getUsername());
         onlineInfo.put("nickname", user.getNickname());
         onlineInfo.put("loginTime", LocalDateTime.now().toString());
-        redisTemplate.opsForValue().set(
-                CacheConstants.ONLINE_USER_PREFIX + accessToken,
-                onlineInfo,
-                jwtUtil.getAccessTokenExpiration(),
-                TimeUnit.MILLISECONDS
-        );
+        onlineUserService.addSession(user.getId(), accessToken, onlineInfo);
 
         boolean passwordExpired = passwordPolicyService.isExpired(user);
 
@@ -93,14 +112,8 @@ public class AuthServiceImpl implements AuthService {
             token = token.substring(7);
         }
         if (token != null) {
-            redisTemplate.opsForValue().set(
-                    CacheConstants.TOKEN_BLACKLIST_PREFIX + token,
-                    "1",
-                    jwtUtil.getAccessTokenExpiration(),
-                    TimeUnit.MILLISECONDS
-            );
-            // 移除在线用户记录
-            redisTemplate.delete(CacheConstants.ONLINE_USER_PREFIX + token);
+            // 使用 onlineUserService 统一移除会话（含 Sorted Set 清理）
+            onlineUserService.kickOut(token);
         }
     }
 
@@ -193,6 +206,34 @@ public class AuthServiceImpl implements AuthService {
                     return node;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private int getConfigInt(String key, int defaultValue) {
+        try {
+            Object val = cacheService.get(CacheConstants.CONFIG_PREFIX + key, String.class);
+            if (val != null) return Integer.parseInt(val.toString());
+        } catch (Exception ignored) {}
+        return defaultValue;
+    }
+
+    private String getConfigString(String key, String defaultValue) {
+        try {
+            Object val = cacheService.get(CacheConstants.CONFIG_PREFIX + key, String.class);
+            if (val != null) return val.toString();
+        } catch (Exception ignored) {}
+        return defaultValue;
+    }
+
+    private void notifyKickedUser(Long userId, String kickedToken) {
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("message", "您的账号在其他设备登录，当前会话已被强制下线");
+            payload.put("kickedToken", kickedToken);
+            messagingTemplate.convertAndSendToUser(
+                    userId.toString(), "/queue/kick", payload);
+        } catch (Exception e) {
+            log.warn("发送踢人通知失败: userId={}, error={}", userId, e.getMessage());
+        }
     }
 
     private void saveLoginLog(String username, int status, String message) {
