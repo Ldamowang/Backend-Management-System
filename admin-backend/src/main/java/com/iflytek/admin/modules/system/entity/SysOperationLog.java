@@ -25,5 +25,9 @@ public class SysOperationLog {
     private Long duration;
     private Integer status;
     private String errorMsg;
+    private String targetType;
+    private Long targetId;
+    private String beforeData;
+    private String afterData;
     private LocalDateTime createdTime;
 }
