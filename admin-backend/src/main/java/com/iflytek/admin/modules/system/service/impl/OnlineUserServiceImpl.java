@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -39,15 +40,66 @@ public class OnlineUserServiceImpl implements OnlineUserService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void kickOut(String token) {
-        // 移除在线用户记录
-        redisTemplate.delete(CacheConstants.ONLINE_USER_PREFIX + token);
+        Object userInfo = redisTemplate.opsForValue().get(CacheConstants.ONLINE_USER_PREFIX + token);
+        if (userInfo instanceof Map) {
+            Long userId = ((Number) ((Map<?, ?>) userInfo).get("userId")).longValue();
+            removeSession(userId, token);
+        } else {
+            redisTemplate.delete(CacheConstants.ONLINE_USER_PREFIX + token);
+        }
         // 将 token 加入黑名单
         redisTemplate.opsForValue().set(
                 CacheConstants.TOKEN_BLACKLIST_PREFIX + token,
-                "1",
+                "kicked",
                 jwtUtil.getAccessTokenExpiration(),
                 TimeUnit.MILLISECONDS
         );
+    }
+
+    @Override
+    public void addSession(Long userId, String token, Map<String, Object> userInfo) {
+        String sessionsKey = CacheConstants.USER_SESSIONS_PREFIX + userId;
+        String tokenKey = CacheConstants.ONLINE_USER_PREFIX + token;
+
+        // Add token to user's session sorted set (score = current timestamp)
+        redisTemplate.opsForZSet().add(sessionsKey, token, System.currentTimeMillis());
+        redisTemplate.expire(sessionsKey, Duration.ofDays(7));
+
+        // Store token detail (keep existing pattern)
+        redisTemplate.opsForValue().set(tokenKey, userInfo,
+                Duration.ofMillis(jwtUtil.getAccessTokenExpiration()));
+    }
+
+    @Override
+    public void removeSession(Long userId, String token) {
+        String sessionsKey = CacheConstants.USER_SESSIONS_PREFIX + userId;
+        redisTemplate.opsForZSet().remove(sessionsKey, token);
+        redisTemplate.delete(CacheConstants.ONLINE_USER_PREFIX + token);
+    }
+
+    @Override
+    public long getSessionCount(Long userId) {
+        String sessionsKey = CacheConstants.USER_SESSIONS_PREFIX + userId;
+        Long count = redisTemplate.opsForZSet().zCard(sessionsKey);
+        return count != null ? count : 0;
+    }
+
+    @Override
+    public String kickOldestSession(Long userId) {
+        String sessionsKey = CacheConstants.USER_SESSIONS_PREFIX + userId;
+        var oldest = redisTemplate.opsForZSet().rangeWithScores(sessionsKey, 0, 0);
+        if (oldest != null && !oldest.isEmpty()) {
+            var entry = oldest.iterator().next();
+            String oldToken = (String) entry.getValue();
+            removeSession(userId, oldToken);
+            // Blacklist the kicked token
+            redisTemplate.opsForValue().set(
+                    CacheConstants.TOKEN_BLACKLIST_PREFIX + oldToken, "kicked",
+                    Duration.ofMillis(jwtUtil.getAccessTokenExpiration()));
+            return oldToken;
+        }
+        return null;
     }
 }
