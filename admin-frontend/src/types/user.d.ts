@@ -39,6 +39,7 @@ export interface LoginForm {
   username: string
   password: string
   remember?: boolean
+  totpCode?: string
 }
 
 export interface LoginResult {
@@ -47,6 +48,7 @@ export interface LoginResult {
   tokenType: string
   expiresIn: number
   passwordExpired?: boolean
+  requiresTwoFactor?: boolean
 }
 
 export interface UserInfoResult {

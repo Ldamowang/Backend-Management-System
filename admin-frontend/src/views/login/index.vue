@@ -63,6 +63,35 @@
       <span>&copy; {{ new Date().getFullYear() }} Admin System</span>
     </div>
 
+    <!-- 2FA 验证弹窗 -->
+    <el-dialog
+      v-model="twoFactorVisible"
+      :title="$t('login.twoFactorTitle')"
+      width="400px"
+      :close-on-click-modal="false"
+      :show-close="true"
+      @close="twoFactorVisible = false"
+    >
+      <p class="two-factor-hint">{{ $t('login.twoFactorHint') }}</p>
+      <el-input
+        v-model="totpCode"
+        :placeholder="$t('login.totpCodePlaceholder')"
+        maxlength="8"
+        size="large"
+        @keyup.enter="handleTwoFactorVerify"
+      />
+      <template #footer>
+        <el-button
+          type="primary"
+          :loading="twoFactorLoading"
+          :disabled="!totpCode"
+          @click="handleTwoFactorVerify"
+        >
+          {{ $t('login.verify') }}
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 密码过期强制修改弹窗 -->
     <el-dialog
       v-model="passwordDialogVisible"
@@ -116,6 +145,11 @@ const userStore = useUserStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 
+// 2FA 相关状态
+const twoFactorVisible = ref(false)
+const totpCode = ref('')
+const twoFactorLoading = ref(false)
+
 const loginForm = reactive({
   username: '',
   password: '',
@@ -161,7 +195,12 @@ async function handleLogin() {
   try {
     await formRef.value?.validate()
     loading.value = true
-    const { passwordExpired } = await userStore.login(loginForm)
+    const { passwordExpired, requiresTwoFactor } = await userStore.login(loginForm)
+
+    if (requiresTwoFactor) {
+      twoFactorVisible.value = true
+      return
+    }
 
     if (passwordExpired) {
       passwordDialogVisible.value = true
@@ -176,6 +215,34 @@ async function handleLogin() {
     ElMessage.error(message)
   } finally {
     loading.value = false
+  }
+}
+
+async function handleTwoFactorVerify() {
+  if (!totpCode.value) return
+  twoFactorLoading.value = true
+  try {
+    const { passwordExpired } = await userStore.login({
+      ...loginForm,
+      totpCode: totpCode.value
+    })
+    twoFactorVisible.value = false
+    totpCode.value = ''
+
+    if (passwordExpired) {
+      passwordDialogVisible.value = true
+      return
+    }
+
+    ElMessage.success(t('login.loginSuccess'))
+    const redirect = (route.query.redirect as string) || '/'
+    router.push(redirect)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : t('login.twoFactorFailed')
+    ElMessage.error(message)
+    totpCode.value = ''
+  } finally {
+    twoFactorLoading.value = false
   }
 }
 
@@ -394,5 +461,13 @@ async function handleChangePassword() {
   color: #334155;
   font-size: $font-size-xs;
   z-index: 1;
+}
+
+// ===== 2FA 弹窗 =====
+.two-factor-hint {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
 }
 </style>

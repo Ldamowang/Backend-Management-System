@@ -61,6 +61,10 @@
                 </el-form-item>
               </el-form>
             </el-tab-pane>
+
+            <el-tab-pane :label="$t('profile.securitySettings')" name="security">
+              <TwoFactorTab />
+            </el-tab-pane>
           </el-tabs>
         </el-card>
       </el-col>
@@ -75,6 +79,7 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { User, Message, Phone, Male } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/modules/user'
 import { getProfile, updateProfile, updatePassword, type ProfileInfo } from '@/api/modules/profile'
+import TwoFactorTab from './components/TwoFactorTab.vue'
 
 const { t } = useI18n()
 const userStore = useUserStore()

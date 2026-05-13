@@ -9,5 +9,10 @@
   "passwordRequired": "请输入密码",
   "remember": "记住密码",
   "loginSuccess": "登录成功",
-  "loginFailed": "登录失败"
+  "loginFailed": "登录失败",
+  "twoFactorTitle": "双因素认证",
+  "twoFactorHint": "请输入身份验证器应用中的 6 位验证码，或使用备用码",
+  "totpCodePlaceholder": "请输入验证码",
+  "verify": "验证",
+  "twoFactorFailed": "验证码错误，请重试"
 }

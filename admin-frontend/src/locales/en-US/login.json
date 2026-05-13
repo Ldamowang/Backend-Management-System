@@ -9,5 +9,10 @@
   "passwordRequired": "Please enter password",
   "remember": "Remember me",
   "loginSuccess": "Login successful",
-  "loginFailed": "Login failed"
+  "loginFailed": "Login failed",
+  "twoFactorTitle": "Two-Factor Authentication",
+  "twoFactorHint": "Enter the 6-digit code from your authenticator app, or use a backup code",
+  "totpCodePlaceholder": "Enter verification code",
+  "verify": "Verify",
+  "twoFactorFailed": "Invalid code, please try again"
 }

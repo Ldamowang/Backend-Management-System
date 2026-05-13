@@ -19,10 +19,13 @@ export const useUserStore = defineStore('user', () => {
 
   async function login(form: LoginForm) {
     const { data } = await loginApi(form)
+    if (data.requiresTwoFactor) {
+      return { passwordExpired: false, requiresTwoFactor: true }
+    }
     token.value = data.accessToken
     setToken(data.accessToken)
     setRefreshToken(data.refreshToken)
-    return { passwordExpired: data.passwordExpired ?? false }
+    return { passwordExpired: data.passwordExpired ?? false, requiresTwoFactor: false }
   }
 
   async function fetchUserInfo() {
