@@ -9,6 +9,7 @@ import com.iflytek.admin.common.utils.JwtUtil;
 import com.iflytek.admin.modules.auth.dto.LoginRequest;
 import com.iflytek.admin.modules.auth.dto.LoginResponse;
 import com.iflytek.admin.modules.auth.service.AuthService;
+import com.iflytek.admin.modules.auth.service.TotpService;
 import com.iflytek.admin.modules.system.entity.*;
 import com.iflytek.admin.modules.system.mapper.*;
 import com.iflytek.admin.modules.system.service.OnlineUserService;
@@ -40,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordPolicyService passwordPolicyService;
     private final OnlineUserService onlineUserService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final TotpService totpService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -57,6 +59,20 @@ public class AuthServiceImpl implements AuthService {
         if (user.getStatus() == 0) {
             saveLoginLog(request.getUsername(), 0, "用户已禁用");
             throw new BusinessException(40006, "用户已被禁用");
+        }
+
+        // 2FA 校验
+        if (totpService.isEnabled(user.getId())) {
+            if (request.getTotpCode() == null || request.getTotpCode().isBlank()) {
+                // 需要 2FA 但未提供验证码
+                return LoginResponse.builder()
+                        .requiresTwoFactor(true)
+                        .build();
+            }
+            if (!totpService.validateForLogin(user.getId(), request.getTotpCode())) {
+                saveLoginLog(request.getUsername(), 0, "2FA验证码错误");
+                throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "2FA验证码错误");
+            }
         }
 
         // 更新登录时间

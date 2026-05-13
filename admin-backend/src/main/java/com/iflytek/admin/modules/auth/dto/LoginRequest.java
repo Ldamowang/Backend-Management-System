@@ -9,4 +9,5 @@ public class LoginRequest {
     private String username;
     @NotBlank(message = "密码不能为空")
     private String password;
+    private String totpCode;
 }

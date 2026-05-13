@@ -17,4 +17,6 @@ public class LoginResponse {
     private long expiresIn;
     @Builder.Default
     private boolean passwordExpired = false;
+    @Builder.Default
+    private boolean requiresTwoFactor = false;
 }
