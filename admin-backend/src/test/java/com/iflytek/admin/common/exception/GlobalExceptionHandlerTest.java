@@ -27,7 +27,7 @@ class GlobalExceptionHandlerTest {
     void handleBusinessException() {
         BusinessException ex = new BusinessException(40001, "用户不存在");
 
-        Result<Void> result = handler.handleBusinessException(ex);
+        Result<Void> result = handler.handleBusinessException(ex).getBody();
 
         assertThat(result.getCode()).isEqualTo(40001);
         assertThat(result.getMessage()).isEqualTo("用户不存在");
@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
     void handleBusinessException_withResultCode() {
         BusinessException ex = new BusinessException(ResultCode.USERNAME_EXISTS);
 
-        Result<Void> result = handler.handleBusinessException(ex);
+        Result<Void> result = handler.handleBusinessException(ex).getBody();
 
         assertThat(result.getCode()).isEqualTo(40002);
         assertThat(result.getMessage()).isEqualTo("用户名已存在");
