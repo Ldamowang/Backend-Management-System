@@ -127,6 +127,13 @@
             <version>5.2.5</version>
         </dependency>
 
+        <!-- EasyExcel (import/export framework) -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <version>3.3.4</version>
+        </dependency>
+
         <!-- TOTP 双因素认证 -->
         <dependency>
             <groupId>com.warrenstrange</groupId>
