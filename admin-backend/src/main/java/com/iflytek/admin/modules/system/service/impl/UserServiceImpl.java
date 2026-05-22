@@ -129,6 +129,28 @@ public class UserServiceImpl implements UserService {
     private static final int EXPORT_MAX_ROWS = 10000;
 
     @Override
+    public boolean existsByUsername(String username) {
+        return userMapper.selectUserByUsername(username) != null;
+    }
+
+    @Override
+    @Transactional
+    public void batchImport(List<com.iflytek.admin.modules.system.dto.UserExportDTO> list) {
+        for (com.iflytek.admin.modules.system.dto.UserExportDTO dto : list) {
+            SysUser user = new SysUser();
+            user.setUsername(dto.getUsername());
+            user.setNickname(dto.getNickname());
+            user.setEmail(dto.getEmail());
+            user.setPhone(dto.getPhone());
+            user.setGender(dto.getGender());
+            user.setStatus(1);
+            // 导入用户默认密码
+            user.setPassword(passwordEncoder.encode("123456"));
+            userMapper.insert(user);
+        }
+    }
+
+    @Override
     public List<Map<String, Object>> listForExport(UserQueryDTO query) {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(query.getUsername())) {

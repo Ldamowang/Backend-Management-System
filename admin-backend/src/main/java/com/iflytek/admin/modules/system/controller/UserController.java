@@ -1,15 +1,13 @@
 package com.iflytek.admin.modules.system.controller;
 
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
 import com.iflytek.admin.common.annotation.Idempotent;
 import com.iflytek.admin.common.annotation.Log;
+import com.iflytek.admin.common.dto.ImportResult;
 import com.iflytek.admin.common.result.PageResult;
 import com.iflytek.admin.common.result.Result;
-import com.iflytek.admin.modules.system.dto.StatusDTO;
-import com.iflytek.admin.modules.system.dto.UserCreateDTO;
-import com.iflytek.admin.modules.system.dto.UserQueryDTO;
-import com.iflytek.admin.modules.system.dto.UserUpdateDTO;
+import com.iflytek.admin.common.service.ExcelExportService;
+import com.iflytek.admin.common.service.ExcelImportService;
+import com.iflytek.admin.modules.system.dto.*;
 import com.iflytek.admin.modules.system.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,13 +16,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Tag(name = "用户管理")
 @RestController
@@ -33,6 +30,8 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final ExcelExportService excelExportService;
+    private final ExcelImportService excelImportService;
 
     @Operation(summary = "用户分页列表")
     @PreAuthorize("hasAuthority('sys:user:list')")
@@ -91,28 +90,42 @@ public class UserController {
     @GetMapping("/export")
     public void export(UserQueryDTO query, HttpServletResponse response) throws IOException {
         List<Map<String, Object>> users = userService.listForExport(query);
+        List<UserExportDTO> exportList = users.stream().map(u -> {
+            UserExportDTO dto = new UserExportDTO();
+            dto.setUsername((String) u.get("username"));
+            dto.setNickname((String) u.get("nickname"));
+            dto.setEmail((String) u.get("email"));
+            dto.setPhone((String) u.get("phone"));
+            dto.setGender((Integer) u.get("gender"));
+            dto.setStatus((Integer) u.get("status"));
+            return dto;
+        }).collect(Collectors.toList());
+        excelExportService.export(response, "用户列表", exportList, UserExportDTO.class);
+    }
 
-        // 定义列映射（中文表头 -> 字段名）
-        Map<String, String> headerAlias = new LinkedHashMap<>();
-        headerAlias.put("id", "ID");
-        headerAlias.put("username", "用户名");
-        headerAlias.put("nickname", "昵称");
-        headerAlias.put("email", "邮箱");
-        headerAlias.put("phone", "手机号");
-        headerAlias.put("gender", "性别");
-        headerAlias.put("status", "状态");
-        headerAlias.put("createdTime", "创建时间");
+    @Operation(summary = "下载用户导入模板")
+    @PreAuthorize("hasAuthority('sys:user:add')")
+    @GetMapping("/import-template")
+    public void importTemplate(HttpServletResponse response) throws IOException {
+        excelExportService.exportTemplate(response, "用户", UserExportDTO.class);
+    }
 
-        ExcelWriter writer = ExcelUtil.getWriter(true);
-        headerAlias.forEach((field, alias) -> writer.addHeaderAlias(field, alias));
-        writer.setOnlyAlias(true);
-        writer.write(users, true);
-        writer.autoSizeColumnAll();
-
-        String fileName = URLEncoder.encode("用户列表.xlsx", StandardCharsets.UTF_8);
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        writer.flush(response.getOutputStream(), true);
-        writer.close();
+    @Operation(summary = "导入用户")
+    @PreAuthorize("hasAuthority('sys:user:add')")
+    @Log(module = "用户管理", operation = "导入")
+    @PostMapping("/import")
+    public Result<ImportResult> importUsers(@RequestParam("file") MultipartFile file) throws IOException {
+        ImportResult result = excelImportService.importData(
+                file,
+                UserExportDTO.class,
+                dto -> {
+                    if (userService.existsByUsername(dto.getUsername())) {
+                        return "用户名 " + dto.getUsername() + " 已存在";
+                    }
+                    return null;
+                },
+                validList -> userService.batchImport(validList)
+        );
+        return Result.ok(result);
     }
 }

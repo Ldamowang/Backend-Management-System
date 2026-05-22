@@ -2,6 +2,7 @@ package com.iflytek.admin.modules.system.service;
 
 import com.iflytek.admin.common.result.PageResult;
 import com.iflytek.admin.modules.system.dto.UserCreateDTO;
+import com.iflytek.admin.modules.system.dto.UserExportDTO;
 import com.iflytek.admin.modules.system.dto.UserQueryDTO;
 import com.iflytek.admin.modules.system.dto.UserUpdateDTO;
 
@@ -16,4 +17,6 @@ public interface UserService {
     void delete(Long id);
     void updateStatus(Long id, Integer status);
     List<Map<String, Object>> listForExport(UserQueryDTO query);
+    boolean existsByUsername(String username);
+    void batchImport(List<UserExportDTO> list);
 }
