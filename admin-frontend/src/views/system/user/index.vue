@@ -38,8 +38,11 @@
         <div class="flex-between">
           <span>{{ $t('system.user.list') }}</span>
           <div>
-            <el-button v-permission="'sys:user:export'" type="success" :loading="exportLoading" @click="handleExport">
+            <el-button v-permission="'sys:user:export'" type="success" :loading="exporting" @click="handleExport">
               <el-icon><Download /></el-icon>{{ $t('common.action.export') }}
+            </el-button>
+            <el-button v-permission="'sys:user:add'" @click="showImportDialog = true">
+              <el-icon><Upload /></el-icon>导入
             </el-button>
             <el-button v-permission="'sys:user:add'" type="primary" @click="handleAdd">
               <el-icon><Plus /></el-icon>{{ $t('system.user.addUser') }}
@@ -137,6 +140,13 @@
         <el-button type="primary" :loading="submitLoading" @click="handleSubmit">{{ $t('common.action.confirm') }}</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="showImportDialog"
+      import-url="/users/import"
+      @download-template="handleDownloadTemplate"
+      @success="handleImportSuccess"
+    />
   </div>
 </template>
 
@@ -144,10 +154,12 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser, updateUserStatus, exportUsers } from '@/api/modules/user'
+import { getUserList, createUser, updateUser, deleteUser, updateUserStatus, exportUsers, downloadImportTemplate } from '@/api/modules/user'
 import { getRoleList } from '@/api/modules/role'
 import { getDeptSimpleTree } from '@/api/modules/dept'
 import { usePagination } from '@/composables/usePagination'
+import { useExport } from '@/composables/useExport'
+import ImportDialog from '@/components/ImportDialog.vue'
 import type { UserInfo, UserForm } from '@/types/user'
 import type { RoleInfo } from '@/types/role'
 import type { DeptSimpleItem } from '@/types/dept'
@@ -156,13 +168,14 @@ const { t } = useI18n()
 
 const loading = ref(false)
 const submitLoading = ref(false)
-const exportLoading = ref(false)
 const tableData = ref<UserInfo[]>([])
 const dialogVisible = ref(false)
+const showImportDialog = ref(false)
 const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 
 const { pagination, handleSizeChange, handleCurrentChange } = usePagination()
+const { exporting, exportData } = useExport()
 const roleList = ref<RoleInfo[]>([])
 const deptTreeData = ref<DeptSimpleItem[]>([])
 
@@ -209,22 +222,31 @@ async function fetchDeptTree() {
   } catch { /* handled by interceptor */ }
 }
 
-async function handleExport() {
-  exportLoading.value = true
+function handleExport() {
+  const params: Record<string, unknown> = {}
+  if (searchForm.username) params.username = searchForm.username
+  if (searchForm.email) params.email = searchForm.email
+  if (searchForm.status !== undefined) params.status = searchForm.status
+  if (searchForm.deptId !== undefined) params.deptId = searchForm.deptId
+  exportData('/users/export', params, '用户列表.xlsx')
+}
+
+async function handleDownloadTemplate() {
   try {
-    const blob = await exportUsers(searchForm) as unknown as Blob
+    const blob = await downloadImportTemplate() as unknown as Blob
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = t('system.user.exportFileName')
+    link.download = '用户导入模板.xlsx'
     link.click()
     window.URL.revokeObjectURL(url)
-    ElMessage.success(t('common.message.exportSuccess'))
   } catch {
-    ElMessage.error(t('common.message.exportFailed'))
-  } finally {
-    exportLoading.value = false
+    ElMessage.error('模板下载失败')
   }
+}
+
+function handleImportSuccess() {
+  fetchData()
 }
 
 function handleAdd() { isEdit.value = false; fetchRoles(); fetchDeptTree(); dialogVisible.value = true }

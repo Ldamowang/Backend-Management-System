@@ -32,3 +32,22 @@ export function exportUsers(params?: UserQuery): Promise<Blob> {
     responseType: 'blob'
   })
 }
+
+export function importUsers(file: File): Promise<ApiResponse<{
+  totalCount: number
+  successCount: number
+  failCount: number
+  errors: { row: number; field: string; message: string }[]
+}>> {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post('/users/import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function downloadImportTemplate(): Promise<Blob> {
+  return request.get('/users/import-template', {
+    responseType: 'blob'
+  })
+}
