@@ -51,3 +51,12 @@ public class TotpController {
     }
 
     @Operation(summary = "查询2FA状态")
+    @GetMapping("/status")
+    public Result<Map<String, Object>> getStatus() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        boolean enabled = totpService.isEnabled(userId);
+        Map<String, Object> status = new HashMap<>();
+        status.put("enabled", enabled);
+        return Result.ok(status);
+    }
+}
