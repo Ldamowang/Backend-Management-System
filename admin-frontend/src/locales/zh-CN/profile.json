@@ -50,5 +50,8 @@
   "verifyAndEnable": "验证并启用",
   "setupSuccess": "双因素认证已成功启用",
   "nextStep": "下一步",
-  "prevStep": "上一步"
+  "prevStep": "上一步",
+  "fetchSetupFailed": "获取2FA配置失败",
+  "verifyFailed": "验证失败",
+  "copyFailed": "复制失败"
 }

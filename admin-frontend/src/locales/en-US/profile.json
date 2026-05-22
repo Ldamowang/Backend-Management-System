@@ -50,5 +50,8 @@
   "verifyAndEnable": "Verify & Enable",
   "setupSuccess": "Two-factor authentication enabled successfully",
   "nextStep": "Next",
-  "prevStep": "Back"
+  "prevStep": "Back",
+  "fetchSetupFailed": "Failed to get 2FA configuration",
+  "verifyFailed": "Verification failed",
+  "copyFailed": "Copy failed"
 }

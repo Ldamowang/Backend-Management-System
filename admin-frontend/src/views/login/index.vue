@@ -241,6 +241,7 @@ async function handleTwoFactorVerify() {
     const message = error instanceof Error ? error.message : t('login.twoFactorFailed')
     ElMessage.error(message)
     totpCode.value = ''
+    loginForm.password = ''
   } finally {
     twoFactorLoading.value = false
   }

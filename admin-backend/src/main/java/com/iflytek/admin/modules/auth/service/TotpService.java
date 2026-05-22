@@ -93,8 +93,13 @@ public class TotpService {
             throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "请先生成2FA密钥");
         }
 
-        if (!googleAuthenticator.authorize(user2fa.getSecretKey(), Integer.parseInt(code))) {
-            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "验证码错误");
+        try {
+            int codeInt = Integer.parseInt(code);
+            if (!googleAuthenticator.authorize(user2fa.getSecretKey(), codeInt)) {
+                throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "验证码错误");
+            }
+        } catch (NumberFormatException e) {
+            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "验证码格式无效");
         }
 
         user2fa.setEnabled(1);

@@ -114,7 +114,7 @@ async function fetchSetup() {
       await QRCode.toCanvas(qrCanvas.value, data.qrCodeUri, { width: 200, margin: 2 })
     }
   } catch {
-    ElMessage.error('获取2FA配置失败')
+    ElMessage.error(t('profile.fetchSetupFailed'))
   } finally {
     setupLoading.value = false
   }
@@ -128,7 +128,7 @@ async function handleVerify() {
     ElMessage.success(t('profile.setupSuccess'))
     emit('success')
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : '验证失败'
+    const message = error instanceof Error ? error.message : t('profile.verifyFailed')
     ElMessage.error(message)
     verifyCode.value = ''
   } finally {
@@ -143,7 +143,7 @@ async function copyBackupCodes() {
     await navigator.clipboard.writeText(text)
     ElMessage.success(t('profile.copied'))
   } catch {
-    ElMessage.error('复制失败')
+    ElMessage.error(t('profile.copyFailed'))
   }
 }
 </script>
