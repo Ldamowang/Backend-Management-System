@@ -154,7 +154,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser, updateUserStatus, exportUsers, downloadImportTemplate } from '@/api/modules/user'
+import { getUserList, createUser, updateUser, deleteUser, updateUserStatus, downloadImportTemplate } from '@/api/modules/user'
 import { getRoleList } from '@/api/modules/role'
 import { getDeptSimpleTree } from '@/api/modules/dept'
 import { usePagination } from '@/composables/usePagination'
